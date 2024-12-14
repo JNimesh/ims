@@ -21,7 +21,12 @@ export class BackendStack extends Stack {
                 environment: {
                     USER_POOL_ID: "ap-south-1_uhIbqxelM",
                     CLIENT_ID: "3sbvcl7ifo0h8cve4takkme495",
-                    CLIENT_SECRET: "6u0iu5no2b80hrs6dr4n8qt113bfoj42rc9se6uqo50fcaaue4v"
+                    CLIENT_SECRET: "6u0iu5no2b80hrs6dr4n8qt113bfoj42rc9se6uqo50fcaaue4v",
+                    DB_HOST: "task-management-db.c3omky0co1uh.ap-south-1.rds.amazonaws.com",
+                    DB_PORT: "3306",
+                    DB_NAME: "task_management",
+                    DB_USER: "admin",
+                    DB_PASSWORD: "42fAanya!",
                 }
             });
 

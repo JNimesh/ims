@@ -1,12 +1,12 @@
 import OpenAPIBackend from "openapi-backend";
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
-import { handlers } from "./mock-handler";
-import { Request } from "openapi-backend";
-import { readFileSync } from "fs";
+import {APIGatewayProxyEvent, APIGatewayProxyResult, Context} from "aws-lambda";
+import {Request} from "openapi-backend";
+import {readFileSync} from "fs";
 import path from "path";
 import yaml from "yaml";
 import jwt from "jsonwebtoken";
-import * as realHandlers from "./handlers";
+import * as handlers from "./handlers";
+import './models';
 
 // Helper to decode JWT and extract roles
 const getRolesFromToken = (authHeader?: string): string[] => {
@@ -37,22 +37,22 @@ const api = new OpenAPIBackend({
 
 // Register Handlers
 api.register({
-    postAuthLogin: realHandlers.handlers.loginHandler,
-    postPatientImages: (c) => {
-        if (validateRoles(c.request.headers?.authorization, ["ADMIN"])) {
-            return handlers.postPatientImages();
-        } else {
-            return { statusCode: 403, body: { message: "Insufficient Roles" } };
-        }
-    },
+    postAuthLogin: handlers.handlers.loginHandler,
+    // postPatientImages: (c) => {
+    //     if (validateRoles(c.request.headers?.authorization, ["ADMIN"])) {
+    //         return handlers.postPatientImages();
+    //     } else {
+    //         return { statusCode: 403, body: { message: "Insufficient Roles" } };
+    //     }
+    // },
     // getPatientTasks: handlers.getPatientTasks,
-    getPatientTaskById: (c) => handlers.getPatientTaskById(c.request.params?.taskId),
+    // getPatientTaskById: (c) => handlers.getPatientTaskById(c.request.params?.taskId),
     // getDoctorTasks: handlers.getDoctorTasks,
-    // postAdminUsers: handlers.postAdminUsers,
-    // putAdminUserById: (c) => handlers.putAdminUserById(c.request.params?.userId),
-    // deleteAdminUserById: (c) => handlers.deleteAdminUserById(c.request.params?.userId),
     // postAdminConsultationTypes: handlers.postAdminConsultationTypes,
     // putAdminConsultationTypeById: (c) => handlers.putAdminConsultationTypeById(c.request.params?.id),
+    postAdminUsers: handlers.handlers.userHandler.createUser,
+    putAdminUserById: handlers.handlers.userHandler.updateUser,
+    deleteAdminUserById: handlers.handlers.userHandler.deleteUser,
 });
 
 api.init();
@@ -62,7 +62,7 @@ export const lambdaHandler = async (
     context: Context
 ): Promise<APIGatewayProxyResult> => {
     try {
-        const { path: requestPath, httpMethod } = event;
+        const {path: requestPath, httpMethod} = event;
 
         // Serve Swagger UI Static Files
         if (requestPath === "/docs") {
@@ -71,7 +71,7 @@ export const lambdaHandler = async (
 
             return {
                 statusCode: 200,
-                headers: { "Content-Type": "text/html" },
+                headers: {"Content-Type": "text/html"},
                 body: swaggerHtml,
             };
         }
@@ -86,7 +86,7 @@ export const lambdaHandler = async (
             // Return the JSON content
             return {
                 statusCode: 200,
-                headers: { "Content-Type": "application/json" },
+                headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(jsonContent),
             };
         }
@@ -102,15 +102,15 @@ export const lambdaHandler = async (
 
         return {
             statusCode: response.statusCode || 500,
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(response.body),
         };
     } catch (error) {
         console.error("Error:", error); // Log the error for debugging
         return {
             statusCode: 500,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: "Internal server error", error: error }),
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({message: "Internal server error", error: error}),
         };
     }
 };

@@ -14,9 +14,12 @@
     "@types/aws-lambda": "^8.10.146",
     "aws-sdk": "^2.1692.0",
     "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.11.5",
     "openapi-backend": "^5.11.1",
+    "sequelize": "^6.37.5",
     "swagger-ui-dist": "^5.18.2",
     "typescript": "^5.7.2",
+    "uuid": "^11.0.3",
     "yaml": "^2.6.1"
   },
   "devDependencies": {
