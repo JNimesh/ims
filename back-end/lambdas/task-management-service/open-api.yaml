@@ -1,0 +1,331 @@
+openapi: 3.0.1
+info:
+  title: Task Management Service
+  description: API for managing tasks for patients, doctors, and administrators.
+  version: 1.0.0
+
+servers:
+  - url: /prod
+
+paths:
+  /auth/login:
+    post:
+      operationId: postAuthLogin
+      summary: Authenticate a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: User authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+  /patient/images:
+    post:
+      operationId: postPatientImages
+      summary: Upload diagnostic images
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImageUploadRequest'
+      responses:
+        '201':
+          description: Image uploaded
+
+  /patient/tasks:
+    get:
+      operationId: getPatientTasks
+      summary: Retrieve all tasks for the patient
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+
+  /patient/tasks/{taskId}:
+    get:
+      operationId: getPatientTaskById
+      summary: Retrieve details of a specific task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+  /doctor/tasks:
+    get:
+      operationId: getDoctorTasks
+      summary: Retrieve all tasks assigned to the doctor
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+
+  /doctor/tasks/{taskId}:
+    get:
+      operationId: getDoctorTaskById
+      summary: Retrieve details of a specific task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+    put:
+      operationId: updateDoctorTask
+      summary: Update task status and add notes
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdateRequest'
+      responses:
+        '200':
+          description: Task updated
+
+  /admin/users:
+    post:
+      operationId: postAdminUsers
+      summary: Create a new user (patient or doctor)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /admin/users/{userId}:
+    put:
+      operationId: putAdminUserById
+      summary: Update details of an existing user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+    delete:
+      operationId: deleteAdminUserById
+      summary: Remove a user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User removed
+
+  /admin/consultation-types:
+    post:
+      operationId: postAdminConsultationTypes
+      summary: Add a new consultation type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsultationTypeRequest'
+      responses:
+        '201':
+          description: Consultation type added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsultationType'
+
+  /admin/consultation-types/{id}:
+    put:
+      operationId: putAdminConsultationTypeById
+      summary: Update an existing consultation type
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsultationTypeRequest'
+      responses:
+        '200':
+          description: Consultation type updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsultationType'
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+
+    ImageUploadRequest:
+      type: object
+      properties:
+        type:
+          type: string
+        url:
+          type: string
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        patientId:
+          type: string
+        doctorId:
+          type: string
+        createdAt:
+          type: string
+          description: "ISO 8601 format for date-time (e.g., 2023-12-01T00:00:00Z)"
+        price:
+          type: number
+        notes:
+          type: string
+
+    TaskUpdateRequest:
+      type: object
+      properties:
+        status:
+          type: string
+        notes:
+          type: string
+
+    CreateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+          enum: [patient, doctor]
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+
+    ConsultationTypeRequest:
+      type: object
+      properties:
+        type:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+
+    ConsultationType:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
