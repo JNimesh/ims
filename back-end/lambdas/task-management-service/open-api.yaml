@@ -12,6 +12,9 @@ paths:
     post:
       operationId: postAuthLogin
       summary: Authenticate a user
+      description: No roles are required to authenticate
+      tags:
+        - Auth
       requestBody:
         required: true
         content:
@@ -30,6 +33,13 @@ paths:
     post:
       operationId: postPatientImages
       summary: Upload diagnostic images
+      description: Roles Allowed **Patient**
+      security:
+        - bearerAuth: [ ] # Secure this endpoint with Cognito
+      x-roles:
+        - Admin
+      tags:
+        - Patient
       requestBody:
         required: true
         content:
@@ -44,6 +54,9 @@ paths:
     get:
       operationId: getPatientTasks
       summary: Retrieve all tasks for the patient
+      description: Roles Allowed **Patient**
+      tags:
+        - Patient
       responses:
         '200':
           description: List of tasks
@@ -58,6 +71,9 @@ paths:
     get:
       operationId: getPatientTaskById
       summary: Retrieve details of a specific task
+      description: Roles Allowed **Patient**
+      tags:
+        - Patient
       parameters:
         - name: taskId
           in: path
@@ -76,6 +92,9 @@ paths:
     get:
       operationId: getDoctorTasks
       summary: Retrieve all tasks assigned to the doctor
+      description: Roles Allowed **Doctor**
+      tags:
+        - Doctor
       responses:
         '200':
           description: List of tasks
@@ -90,6 +109,9 @@ paths:
     get:
       operationId: getDoctorTaskById
       summary: Retrieve details of a specific task
+      description: Roles Allowed **Doctor**
+      tags:
+        - Doctor
       parameters:
         - name: taskId
           in: path
@@ -106,6 +128,9 @@ paths:
 
     put:
       operationId: updateDoctorTask
+      description: Roles Allowed **Doctor**
+      tags:
+        - Doctor
       summary: Update task status and add notes
       parameters:
         - name: taskId
@@ -127,6 +152,9 @@ paths:
     post:
       operationId: postAdminUsers
       summary: Create a new user (patient or doctor)
+      description: Roles Allowed **Admin**
+      tags:
+        - Admin
       requestBody:
         required: true
         content:
@@ -144,7 +172,10 @@ paths:
   /admin/users/{userId}:
     put:
       operationId: putAdminUserById
+      tags:
+        - Admin
       summary: Update details of an existing user
+      description: Roles Allowed **Admin**
       parameters:
         - name: userId
           in: path
@@ -168,6 +199,9 @@ paths:
     delete:
       operationId: deleteAdminUserById
       summary: Remove a user
+      description: Roles Allowed **Admin**
+      tags:
+        - Admin
       parameters:
         - name: userId
           in: path
@@ -180,8 +214,11 @@ paths:
 
   /admin/consultation-types:
     post:
+      tags:
+        - Admin
       operationId: postAdminConsultationTypes
       summary: Add a new consultation type
+      description: Roles Allowed **Admin**
       requestBody:
         required: true
         content:
@@ -198,8 +235,11 @@ paths:
 
   /admin/consultation-types/{id}:
     put:
+      tags:
+        - Admin
       operationId: putAdminConsultationTypeById
       summary: Update an existing consultation type
+      description: Roles Allowed **Admin**
       parameters:
         - name: id
           in: path
@@ -221,6 +261,11 @@ paths:
                 $ref: '#/components/schemas/ConsultationType'
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     LoginRequest:
       type: object

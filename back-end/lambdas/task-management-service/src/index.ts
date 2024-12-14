@@ -5,7 +5,29 @@ import { Request } from "openapi-backend";
 import { readFileSync } from "fs";
 import path from "path";
 import yaml from "yaml";
+import jwt from "jsonwebtoken";
 import * as realHandlers from "./handlers";
+
+// Helper to decode JWT and extract roles
+const getRolesFromToken = (authHeader?: string): string[] => {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return [];
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.decode(token);
+
+    if (!decoded || typeof decoded === "string" || !decoded["cognito:groups"]) {
+        return [];
+    }
+
+    return decoded["cognito:groups"] as string[];
+};
+
+const validateRoles = (token: string, requiredRoles: string[]): boolean => {
+    const roles = getRolesFromToken(token);
+    return roles.some((role) => requiredRoles.includes(role))
+};
 
 
 // Initialize OpenAPI Backend
@@ -16,7 +38,13 @@ const api = new OpenAPIBackend({
 // Register Handlers
 api.register({
     postAuthLogin: realHandlers.handlers.loginHandler,
-    // postPatientImages: handlers.postPatientImages,
+    postPatientImages: (c) => {
+        if (validateRoles(c.request.headers?.authorization, ["ADMIN"])) {
+            return handlers.postPatientImages();
+        } else {
+            return { statusCode: 403, body: { message: "Insufficient Roles" } };
+        }
+    },
     // getPatientTasks: handlers.getPatientTasks,
     getPatientTaskById: (c) => handlers.getPatientTaskById(c.request.params?.taskId),
     // getDoctorTasks: handlers.getDoctorTasks,
@@ -69,7 +97,7 @@ export const lambdaHandler = async (
             path: event.path,
             body: event.body ? JSON.parse(event.body) : undefined,
             query: event.queryStringParameters || {},
-            headers: {}
+            headers: event.headers
         } as Request);
 
         return {

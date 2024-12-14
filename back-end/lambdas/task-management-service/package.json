@@ -13,12 +13,14 @@
   "dependencies": {
     "@types/aws-lambda": "^8.10.146",
     "aws-sdk": "^2.1692.0",
+    "jsonwebtoken": "^9.0.2",
     "openapi-backend": "^5.11.1",
     "swagger-ui-dist": "^5.18.2",
     "typescript": "^5.7.2",
     "yaml": "^2.6.1"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.10.1",
     "openapi-typegen": "^2.0.1",
     "openapi-typescript": "^7.4.4"
