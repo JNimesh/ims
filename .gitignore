@@ -1,14 +1,14 @@
-*.js
-!jest.config.js
-*.d.ts
-back-end/node_modules
-
-# CDK asset staging directory
-back-end/.cdk.staging
-back-end/cdk.out
-
-back-end/lambdas/*.zip
-back-end/lambdas/*/dist
-back-end/lambdas/*/node_modules
-
-frontend/node_modules
+#*.js
+#!jest.config.js
+#*.d.ts
+#back-end/node_modules
+#
+## CDK asset staging directory
+#back-end/.cdk.staging
+#back-end/cdk.out
+#
+#back-end/lambdas/*.zip
+#back-end/lambdas/*/dist
+#back-end/lambdas/*/node_modules
+#
+#frontend/node_modules
