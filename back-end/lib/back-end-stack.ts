@@ -35,7 +35,10 @@ export class BackendStack extends Stack {
                     actions: [
                         "cognito-idp:AdminInitiateAuth",
                         "cognito-idp:ListUsers",
-                        "cognito-idp:AdminRespondToAuthChallenge"
+                        "cognito-idp:AdminRespondToAuthChallenge",
+                        "cognito-idp:AdminCreateUser",
+                        "cognito-idp:AdminAddUserToGroup",
+                        "cognito-idp:AdminDeleteUser",
                     ],
                     resources: [`arn:aws:cognito-idp:${this.region}:${this.account}:userpool/ap-south-1_uhIbqxelM`],
                 })

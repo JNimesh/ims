@@ -1,8 +1,9 @@
-import { Context } from "openapi-backend";
-import { Patient } from "../models/Patient";
-import { Doctor } from "../models/Doctor";
-import { v4 as uuidv4 } from "uuid";
-import {AWSError} from "aws-sdk";
+import {Context} from "openapi-backend";
+import {Patient, Doctor} from "../models";
+import {v4 as uuidv4} from "uuid";
+import AWS, {AWSError} from "aws-sdk";
+import {createCognitoUser, deleteCognitoUser} from "../services/cognitoService";
+import {createUserInDb, deleteUserFromDb, updateUserInDb} from "../services/userService";
 
 const getUserModel = (role: string) => {
     if (role === "doctor") return Doctor;
@@ -13,35 +14,46 @@ const getUserModel = (role: string) => {
 // Create User Handler
 export const createUser = async (context: Context): Promise<Record<string, any>> => {
     try {
-        const { name, email, phone, role } = context.request.body;
+        const {name, email, phone, role} = context.request.body;
 
         if (!name || !email || !role) {
             return {
                 statusCode: 400,
-                body: { message: "Name, email, and role are required" },
+                body: {message: "Name, email, and role are required"},
             };
         }
 
-        const Model = getUserModel(role);
-        const authId = uuidv4(); // Replace with Cognito logic
+        if (!["DOCTOR", "PATIENT", "ADMIN", "FINANCE"].includes(role?.toUpperCase())) {
+            return {
+                statusCode: 400,
+                body: {message: "Role must be either DOCTOR or PATIENT"},
+            };
+        }
 
-        const user = await Model.create({
-            id: uuidv4(),
-            name,
-            email,
-            phone,
-            authId,
-        });
+        const randomPassword = uuidv4();
 
-        return {
-            statusCode: 201,
-            body: user,
-        };
+        // Create user in Cognito
+        const authId = await createCognitoUser(email, randomPassword, role);
+
+        if (role?.toUpperCase() === "ADMIN" || role?.toUpperCase() === "FINANCE") {
+            return {
+                statusCode: 201,
+                body: {user: {email, role}},
+            };
+        } else {
+            // Create user in database
+            const user = await createUserInDb(uuidv4(), name, email, phone, authId, role);
+
+            return {
+                statusCode: 201,
+                body: user,
+            };
+        }
     } catch (error) {
         console.error("Error creating user:", error);
         return {
             statusCode: 500,
-            body: { message: "Internal server error", error: (error as AWSError).message },
+            body: {message: "Internal server error", error: (error as AWSError).message},
         };
     }
 };
@@ -60,17 +72,14 @@ export const updateUser = async (context: Context): Promise<Record<string, any>>
             };
         }
 
-        const Model = getUserModel(role);
-        const user = await Model.findByPk(userId);
-
-        if (!user) {
+        if (role?.toUpperCase() === "ADMIN" || role?.toUpperCase() === "FINANCE") {
             return {
-                statusCode: 404,
-                body: { message: "User not found" },
+                statusCode: 400,
+                body: { message: "Cannot update admin or finance user" },
             };
         }
 
-        await user.update({ name, email, phone });
+        const user = await updateUserInDb(userId, name, email, phone, role.toUpperCase() as "DOCTOR" | "PATIENT");
 
         return {
             statusCode: 200,
@@ -80,7 +89,7 @@ export const updateUser = async (context: Context): Promise<Record<string, any>>
         console.error("Error updating user:", error);
         return {
             statusCode: 500,
-            body: { message: "Internal server error", error: (error as AWSError).message },
+            body: { message: "Internal server error", error: error.message },
         };
     }
 };
@@ -98,17 +107,18 @@ export const deleteUser = async (context: Context): Promise<Record<string, any>>
             };
         }
 
-        const Model = getUserModel(role);
-        const user = await Model.findByPk(userId);
-
-        if (!user) {
+        if (!["DOCTOR", "PATIENT"].includes(role.toUpperCase())) {
             return {
-                statusCode: 404,
-                body: { message: "User not found" },
+                statusCode: 400,
+                body: { message: "Role must be either DOCTOR or PATIENT" },
             };
         }
 
-        await user.destroy();
+        // Get the user from the database
+        const user = await deleteUserFromDb(userId, role.toUpperCase() as "DOCTOR" | "PATIENT");
+
+        // Delete the user from Cognito
+        await deleteCognitoUser(user.email);
 
         return {
             statusCode: 204,
@@ -118,7 +128,7 @@ export const deleteUser = async (context: Context): Promise<Record<string, any>>
         console.error("Error deleting user:", error);
         return {
             statusCode: 500,
-            body: { message: "Internal server error", error: (error as AWSError).message },
+            body: { message: "Internal server error", error: error.message },
         };
     }
 };
