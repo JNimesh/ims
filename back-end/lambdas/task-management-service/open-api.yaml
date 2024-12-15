@@ -232,14 +232,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConsultationType'
+  /consultation-types:
+    get:
+      operationId: getAdminConsultationTypes
+      tags:
+        - Admin
+      summary: Retrieve all consultation types
+      responses:
+        '200':
+          description: List of consultation types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConsultationType'
 
   /admin/consultation-types/{id}:
     put:
+      operationId: putAdminConsultationTypeById
       tags:
         - Admin
-      operationId: putAdminConsultationTypeById
-      summary: Update an existing consultation type
-      description: Roles Allowed **Admin**
+      summary: Update a consultation type
       parameters:
         - name: id
           in: path
@@ -251,7 +265,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ConsultationTypeRequest'
+              type: object
+              properties:
+                type:
+                  type: string
+                  example: "Updated Consultation"
+                description:
+                  type: string
+                  example: "Updated description"
+                price:
+                  type: number
+                  example: 120.0
       responses:
         '200':
           description: Consultation type updated

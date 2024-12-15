@@ -1,6 +1,7 @@
 import {Sequelize} from 'sequelize';
 import {initDoctor, Doctor} from './Doctor';
 import {initPatient, Patient} from './Patient';
+import {initConsultationType} from "./ConsultationType";
 
 // Setup Sequelize to use SQLite
 const sequelize =
@@ -16,6 +17,7 @@ const sequelize =
 // Initialize Models
 initDoctor(sequelize);
 initPatient(sequelize);
+initConsultationType(sequelize);
 
 (async () => {
     try {
