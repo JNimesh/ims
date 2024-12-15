@@ -30,3 +30,15 @@ export const updateTask = async (
     await task.update(updates);
     return task;
 };
+
+export const getTasksByDoctorId = async (doctorId: string) => {
+    return await Task.findAll({
+        where: { doctorId },
+    });
+};
+
+export const getTasksByPatientId = async (patientId: string) => {
+    return await Task.findAll({
+        where: { patientId },
+    });
+};

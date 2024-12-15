@@ -32,6 +32,8 @@ paths:
   /tasks:
     post:
       summary: Create a new task
+      tags:
+        - Tasks
       operationId: postTasks
       requestBody:
         required: true
@@ -46,6 +48,8 @@ paths:
   /tasks/{taskId}/images:
     post:
       summary: Upload an image for a task
+      tags:
+        - Images
       parameters:
         - name: taskId
           in: path
@@ -63,6 +67,8 @@ paths:
         '201':
           description: Image uploaded successfully
     get:
+      tags:
+        - Images
       parameters:
         - name: taskId
           in: path
@@ -77,6 +83,8 @@ paths:
 
   /tasks/{taskId}:
     patch:
+      tags:
+        - Tasks
       summary: Update a task
       parameters:
         - name: taskId
@@ -94,17 +102,44 @@ paths:
       responses:
         '200':
           description: Task updated successfully
-
-  /doctor/tasks:
+  /doctor/{doctorId}/tasks:
     get:
       operationId: getDoctorTasks
-      summary: Retrieve all tasks assigned to the doctor
-      description: Roles Allowed **Doctor**
+      summary: Retrieve tasks assigned to a doctor
       tags:
-        - Doctor
+        - Tasks
+      parameters:
+        - name: doctorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
-          description: List of tasks
+          description: List of tasks assigned to the doctor
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+  /patient/{patientId}/tasks:
+    get:
+      operationId: getPatientTasks
+      summary: Retrieve tasks for a patient
+      tags:
+        - Tasks
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of tasks associated with the patient
           content:
             application/json:
               schema:
@@ -247,7 +282,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConsultationType'
-
 components:
   securitySchemes:
     bearerAuth:

@@ -55,7 +55,8 @@ api.register({
     getTaskImages: handlers.handlers.taskHandler.getImagesByTaskHandler,
     patchTaskById: handlers.handlers.taskHandler.updateTaskHandler,
     postTasks: handlers.handlers.taskHandler.createTaskHandler,
-
+    getDoctorTasks: handlers.handlers.taskHandler.getDoctorTasks,
+    getPatientTasks: handlers.handlers.taskHandler.getPatientTasks,
 
     postAdminUsers: handlers.handlers.userHandler.createUser,
     putAdminUserById: handlers.handlers.userHandler.updateUser,

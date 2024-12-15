@@ -1,5 +1,5 @@
 import { Context } from "openapi-backend";
-import {createTask, updateTask} from "../services/taskService";
+import {createTask, getTasksByDoctorId, getTasksByPatientId, updateTask} from "../services/taskService";
 import {getImagesByTask, saveImageRecord, uploadImageToS3} from "../services/imageService";
 import {AWSError} from "aws-sdk";
 
@@ -99,6 +99,74 @@ export const updateTaskHandler = async (context: Context): Promise<Record<string
         };
     } catch (error) {
         console.error("Error updating task:", error);
+        return {
+            statusCode: 500,
+            body: { message: "Internal server error", error: (error as AWSError).message },
+        };
+    }
+};
+
+// Get tasks for a specific doctor
+export const getDoctorTasks = async (context: Context): Promise<Record<string, any>> => {
+    try {
+        const doctorId = context.request.params?.doctorId;
+
+        if (!doctorId) {
+            return {
+                statusCode: 400,
+                body: { message: "Doctor ID is required" },
+            };
+        }
+
+        const tasks = await getTasksByDoctorId(doctorId);
+
+        if (!tasks.length) {
+            return {
+                statusCode: 404,
+                body: { message: "No tasks found for the specified doctor" },
+            };
+        }
+
+        return {
+            statusCode: 200,
+            body: tasks,
+        };
+    } catch (error) {
+        console.error("Error fetching tasks for doctor:", error);
+        return {
+            statusCode: 500,
+            body: { message: "Internal server error", error: (error as AWSError).message },
+        };
+    }
+};
+
+// Get tasks for a specific patient
+export const getPatientTasks = async (context: Context): Promise<Record<string, any>> => {
+    try {
+        const patientId = context.request.params?.patientId;
+
+        if (!patientId) {
+            return {
+                statusCode: 400,
+                body: { message: "Patient ID is required" },
+            };
+        }
+
+        const tasks = await getTasksByPatientId(patientId);
+
+        if (!tasks.length) {
+            return {
+                statusCode: 404,
+                body: { message: "No tasks found for the specified patient" },
+            };
+        }
+
+        return {
+            statusCode: 200,
+            body: tasks,
+        };
+    } catch (error) {
+        console.error("Error fetching tasks for patient:", error);
         return {
             statusCode: 500,
             body: { message: "Internal server error", error: (error as AWSError).message },
