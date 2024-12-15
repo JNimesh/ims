@@ -29,64 +29,71 @@ paths:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
 
-  /patient/images:
+  /tasks:
     post:
-      operationId: postPatientImages
-      summary: Upload diagnostic images
-      description: Roles Allowed **Patient**
-      security:
-        - bearerAuth: [ ] # Secure this endpoint with Cognito
-      x-roles:
-        - Admin
-      tags:
-        - Patient
+      summary: Create a new task
+      operationId: postTasks
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ImageUploadRequest'
+              $ref: '#/components/schemas/CreateTaskRequest'
       responses:
         '201':
-          description: Image uploaded
+          description: Task created successfully
 
-  /patient/tasks:
-    get:
-      operationId: getPatientTasks
-      summary: Retrieve all tasks for the patient
-      description: Roles Allowed **Patient**
-      tags:
-        - Patient
-      responses:
-        '200':
-          description: List of tasks
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Task'
-
-  /patient/tasks/{taskId}:
-    get:
-      operationId: getPatientTaskById
-      summary: Retrieve details of a specific task
-      description: Roles Allowed **Patient**
-      tags:
-        - Patient
+  /tasks/{taskId}/images:
+    post:
+      summary: Upload an image for a task
       parameters:
         - name: taskId
           in: path
           required: true
           schema:
             type: string
+      operationId: postTaskImages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostImageRequest'
+      responses:
+        '201':
+          description: Image uploaded successfully
+    get:
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: Get images for a task
+      operationId: getTaskImages
       responses:
         '200':
-          description: Task details
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Task'
+          description: List of images with pre-signed URLs
+
+  /tasks/{taskId}:
+    patch:
+      summary: Update a task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      operationId: patchTaskById
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Task updated successfully
 
   /doctor/tasks:
     get:
@@ -104,49 +111,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Task'
-
-  /doctor/tasks/{taskId}:
-    get:
-      operationId: getDoctorTaskById
-      summary: Retrieve details of a specific task
-      description: Roles Allowed **Doctor**
-      tags:
-        - Doctor
-      parameters:
-        - name: taskId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Task details
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Task'
-
-    put:
-      operationId: updateDoctorTask
-      description: Roles Allowed **Doctor**
-      tags:
-        - Doctor
-      summary: Update task status and add notes
-      parameters:
-        - name: taskId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TaskUpdateRequest'
-      responses:
-        '200':
-          description: Task updated
 
   /admin/users:
     post:
@@ -172,10 +136,10 @@ paths:
   /admin/users/{userId}:
     put:
       operationId: putAdminUserById
-      tags:
-        - Admin
       summary: Update details of an existing user
       description: Roles Allowed **Admin**
+      tags:
+        - Admin
       parameters:
         - name: userId
           in: path
@@ -195,7 +159,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-
     delete:
       operationId: deleteAdminUserById
       summary: Remove a user
@@ -214,11 +177,11 @@ paths:
 
   /admin/consultation-types:
     post:
-      tags:
-        - Admin
       operationId: postAdminConsultationTypes
       summary: Add a new consultation type
       description: Roles Allowed **Admin**
+      tags:
+        - Consultation Types
       requestBody:
         required: true
         content:
@@ -232,12 +195,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConsultationType'
+
   /consultation-types:
     get:
       operationId: getAdminConsultationTypes
-      tags:
-        - Admin
       summary: Retrieve all consultation types
+      tags:
+        - Consultation Types
       responses:
         '200':
           description: List of consultation types
@@ -251,9 +215,9 @@ paths:
   /admin/consultation-types/{id}:
     put:
       operationId: putAdminConsultationTypeById
-      tags:
-        - Admin
       summary: Update a consultation type
+      tags:
+        - Consultation Types
       parameters:
         - name: id
           in: path
@@ -298,21 +262,11 @@ components:
           type: string
         password:
           type: string
-
     LoginResponse:
       type: object
       properties:
         token:
           type: string
-
-    ImageUploadRequest:
-      type: object
-      properties:
-        type:
-          type: string
-        url:
-          type: string
-
     Task:
       type: object
       properties:
@@ -320,41 +274,78 @@ components:
           type: string
         type:
           type: string
+          example: "Diagnosis"
         status:
           type: string
+          example: "Open"
         patientId:
           type: string
         doctorId:
           type: string
-        createdAt:
-          type: string
-          description: "ISO 8601 format for date-time (e.g., 2023-12-01T00:00:00Z)"
+          nullable: true
         price:
           type: number
+          format: float
+        notes:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    CreateTaskRequest:
+      type: object
+      properties:
+        type:
+          type: string
+        status:
+          type: string
+          enum:
+            - Open
+            - In Progress
+            - Closed
+        patientId:
+          type: string
+        doctorId:
+          type: string
+          nullable: true
+        price:
+          type: number
+          format: float
         notes:
           type: string
 
-    TaskUpdateRequest:
+    UpdateTaskRequest:
       type: object
       properties:
         status:
           type: string
+        doctorId:
+          type: string
+          nullable: true
+        price:
+          type: number
+          format: float
         notes:
           type: string
 
-    CreateUserRequest:
+    Image:
       type: object
       properties:
-        name:
+        id:
           type: string
-        email:
+        type:
           type: string
-        phone:
+        url:
           type: string
-        role:
+          format: uri
+        patientId:
           type: string
-          enum: [patient, doctor]
-
+        taskId:
+          type: string
+          nullable: true
+        uploadedAt:
+          type: string
     UpdateUserRequest:
       type: object
       properties:
@@ -364,7 +355,6 @@ components:
           type: string
         phone:
           type: string
-
     User:
       type: object
       properties:
@@ -376,7 +366,6 @@ components:
           type: string
         phone:
           type: string
-
     ConsultationTypeRequest:
       type: object
       properties:
@@ -386,7 +375,6 @@ components:
           type: string
         price:
           type: number
-
     ConsultationType:
       type: object
       properties:
@@ -398,3 +386,27 @@ components:
           type: string
         price:
           type: number
+    PostImageRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "X-Ray"
+        data:
+          type: string
+          description: "Base64 encoded string of the image"
+        contentType:
+          type: string
+          example: "image/png"
+    CreateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+          enum: [ PATIENT, DOCTOR ]

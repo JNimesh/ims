@@ -27,6 +27,7 @@ export class BackendStack extends Stack {
                     DB_NAME: "task_management",
                     DB_USER: "admin",
                     DB_PASSWORD: "42fAanya!",
+                    S3_BUCKET_NAME: "ims-data-bucket",
                 }
             });
 
@@ -41,6 +42,18 @@ export class BackendStack extends Stack {
                         "cognito-idp:AdminDeleteUser",
                     ],
                     resources: [`arn:aws:cognito-idp:${this.region}:${this.account}:userpool/ap-south-1_uhIbqxelM`],
+                })
+            );
+
+            lambdaFunction.addToRolePolicy(
+                new iam.PolicyStatement({
+                    actions: [
+                        "s3:PutObject",
+                        "s3:GetObject",
+                        "s3:DeleteObject",
+                        "s3:ListBucket",
+                    ],
+                    resources: [`arn:aws:s3:::ims-data-bucket/*`],
                 })
             );
 

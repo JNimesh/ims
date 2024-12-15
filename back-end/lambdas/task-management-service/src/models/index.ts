@@ -2,6 +2,8 @@ import {Sequelize} from 'sequelize';
 import {initDoctor, Doctor} from './Doctor';
 import {initPatient, Patient} from './Patient';
 import {initConsultationType} from "./ConsultationType";
+import {initTask, Task} from "./Task";
+import {initImage, Image} from "./Image";
 
 // Setup Sequelize to use SQLite
 const sequelize =
@@ -18,6 +20,19 @@ const sequelize =
 initDoctor(sequelize);
 initPatient(sequelize);
 initConsultationType(sequelize);
+initTask(sequelize);
+initImage(sequelize);
+
+// Define associations
+Patient.hasMany(Task, { foreignKey: 'patientId', as: 'tasks' });
+Doctor.hasMany(Task, { foreignKey: 'doctorId', as: 'tasks' });
+Task.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
+Task.belongsTo(Doctor, { foreignKey: 'doctorId', as: 'doctor' });
+
+Patient.hasMany(Image, { foreignKey: 'patientId', as: 'images' });
+Task.hasMany(Image, { foreignKey: 'taskId', as: 'images' });
+Image.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
+Image.belongsTo(Task, { foreignKey: 'taskId', as: 'task' });
 
 (async () => {
     try {
@@ -30,4 +45,4 @@ initConsultationType(sequelize);
     }
 })();
 
-export {Doctor, Patient};
+export {Doctor, Patient, Image, Task, sequelize};

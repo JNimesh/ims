@@ -51,6 +51,12 @@ api.register({
     // getDoctorTasks: handlers.getDoctorTasks,
     // postAdminConsultationTypes: handlers.postAdminConsultationTypes,
     // putAdminConsultationTypeById: (c) => handlers.putAdminConsultationTypeById(c.request.params?.id),
+    postTaskImages: handlers.handlers.taskHandler.postImageHandler,
+    getTaskImages: handlers.handlers.taskHandler.getImagesByTaskHandler,
+    patchTaskById: handlers.handlers.taskHandler.updateTaskHandler,
+    postTasks: handlers.handlers.taskHandler.createTaskHandler,
+
+
     postAdminUsers: handlers.handlers.userHandler.createUser,
     putAdminUserById: handlers.handlers.userHandler.updateUser,
     deleteAdminUserById: handlers.handlers.userHandler.deleteUser,
