@@ -61,7 +61,7 @@ export const deleteCognitoUser = async (email: string) => {
             })
             .promise();
     } catch (error) {
-        if (error.code === "UserNotFoundException") {
+        if ((error as AWSError).code === "UserNotFoundException") {
             throw new Error("User not found in Cognito");
         }
         throw error;

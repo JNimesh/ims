@@ -89,7 +89,7 @@ export const updateUser = async (context: Context): Promise<Record<string, any>>
         console.error("Error updating user:", error);
         return {
             statusCode: 500,
-            body: { message: "Internal server error", error: error.message },
+            body: { message: "Internal server error", error: (error as AWSError).message },
         };
     }
 };
@@ -128,7 +128,7 @@ export const deleteUser = async (context: Context): Promise<Record<string, any>>
         console.error("Error deleting user:", error);
         return {
             statusCode: 500,
-            body: { message: "Internal server error", error: error.message },
+            body: { message: "Internal server error", error: (error as AWSError).message },
         };
     }
 };
