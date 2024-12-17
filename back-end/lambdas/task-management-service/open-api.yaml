@@ -42,45 +42,12 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateTaskRequest'
       responses:
-        '201':
-          description: Task created successfully
-
-  /tasks/{taskId}/images:
-    post:
-      summary: Upload an image for a task
-      tags:
-        - Images
-      parameters:
-        - name: taskId
-          in: path
-          required: true
-          schema:
-            type: string
-      operationId: postTaskImages
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PostImageRequest'
-      responses:
-        '201':
-          description: Image uploaded successfully
-    get:
-      tags:
-        - Images
-      parameters:
-        - name: taskId
-          in: path
-          required: true
-          schema:
-            type: string
-      summary: Get images for a task
-      operationId: getTaskImages
-      responses:
         '200':
-          description: List of images with pre-signed URLs
-
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
   /tasks/{taskId}:
     patch:
       tags:
@@ -102,6 +69,10 @@ paths:
       responses:
         '200':
           description: Task updated successfully
+          content:
+           application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
   /doctor/{doctorId}/tasks:
     get:
       operationId: getDoctorTasks
@@ -146,14 +117,55 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Task'
-
-  /admin/users:
+  /tasks/{taskId}/images:
     post:
-      operationId: postAdminUsers
+      summary: Upload an image for a task
+      tags:
+        - Images
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      operationId: postTaskImages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostImageRequest'
+      responses:
+        '201':
+          description: Image uploaded successfully
+    get:
+      tags:
+        - Images
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: Get images for a task
+      operationId: getTaskImages
+      responses:
+        '200':
+          description: List of images with pre-signed URLs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Image'
+
+  /users:
+    post:
+      operationId: postUsers
       summary: Create a new user (patient or doctor)
       description: Roles Allowed **Admin**
       tags:
-        - Admin
+        - Users (Admin Access Only)
       requestBody:
         required: true
         content:
@@ -168,13 +180,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
 
-  /admin/users/{userId}:
+  /users/{userId}:
     put:
-      operationId: putAdminUserById
+      operationId: putUserById
       summary: Update details of an existing user
       description: Roles Allowed **Admin**
       tags:
-        - Admin
+        - Users (Admin Access Only)
       parameters:
         - name: userId
           in: path
@@ -199,7 +211,7 @@ paths:
       summary: Remove a user
       description: Roles Allowed **Admin**
       tags:
-        - Admin
+        - Users (Admin Access Only)
       parameters:
         - name: userId
           in: path
@@ -210,9 +222,9 @@ paths:
         '204':
           description: User removed
 
-  /admin/consultation-types:
+  /consultation-types:
     post:
-      operationId: postAdminConsultationTypes
+      operationId: postConsultationTypes
       summary: Add a new consultation type
       description: Roles Allowed **Admin**
       tags:
@@ -230,8 +242,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConsultationType'
-
-  /consultation-types:
     get:
       operationId: getAdminConsultationTypes
       summary: Retrieve all consultation types
@@ -247,9 +257,9 @@ paths:
                 items:
                   $ref: '#/components/schemas/ConsultationType'
 
-  /admin/consultation-types/{id}:
+  /consultation-types/{id}:
     put:
-      operationId: putAdminConsultationTypeById
+      operationId: putConsultationTypeById
       summary: Update a consultation type
       tags:
         - Consultation Types
@@ -398,8 +408,16 @@ components:
     LoginResponse:
       type: object
       properties:
-        token:
+        accessToken:
           type: string
+        idToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+        expiresIn:
+          type: integer
     Task:
       type: object
       properties:
@@ -407,9 +425,12 @@ components:
           type: string
         type:
           type: string
-          example: "Diagnosis"
+          example: "Consultation type id"
         status:
           type: string
+          enum:
+            - Open
+            - Closed
           example: "Open"
         patientId:
           type: string
@@ -435,7 +456,6 @@ components:
           type: string
           enum:
             - Open
-            - In Progress
             - Closed
         patientId:
           type: string
@@ -469,15 +489,18 @@ components:
           type: string
         type:
           type: string
+        signedUrl:
+          type: string
         url:
           type: string
-          format: uri
         patientId:
           type: string
         taskId:
           type: string
           nullable: true
-        uploadedAt:
+        createdAt:
+          type: string
+        updatedAt:
           type: string
     UpdateUserRequest:
       type: object
@@ -519,16 +542,19 @@ components:
           type: string
         price:
           type: number
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
     PostImageRequest:
       type: object
       properties:
-        type:
+        patientId:
           type: string
-          example: "X-Ray"
-        data:
+        base64Data:
           type: string
           description: "Base64 encoded string of the image"
-        contentType:
+        type:
           type: string
           example: "image/png"
     CreateUserRequest:

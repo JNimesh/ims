@@ -45,15 +45,14 @@ api.register({
     postTasks: handlers.handlers.taskHandler.createTaskHandler,
     getDoctorTasks: handlers.handlers.taskHandler.getDoctorTasks,
     getPatientTasks: handlers.handlers.taskHandler.getPatientTasks,
-    postAdminUsers: handlers.handlers.userHandler.createUser,
-    putAdminUserById: handlers.handlers.userHandler.updateUser,
-    deleteAdminUserById: handlers.handlers.userHandler.deleteUser,
-    postAdminConsultationTypes: handlers.handlers.consultationTypeHandler.createConsultationTypeHandler,
-    getAdminConsultationTypes: handlers.handlers.consultationTypeHandler.getConsultationTypesHandler,
-    putAdminConsultationTypeById: handlers.handlers.consultationTypeHandler.updateConsultationTypeHandler,
+    postUsers: handlers.handlers.userHandler.createUser,
+    putUserById: handlers.handlers.userHandler.updateUser,
+    deleteUserById: handlers.handlers.userHandler.deleteUser,
+    postConsultationTypes: handlers.handlers.consultationTypeHandler.createConsultationTypeHandler,
+    getConsultationTypes: handlers.handlers.consultationTypeHandler.getConsultationTypesHandler,
+    putConsultationTypeById: handlers.handlers.consultationTypeHandler.updateConsultationTypeHandler,
     createDoctorCompetencies: handlers.handlers.doctorCompetencyHandler.createDoctorCompetenciesHandler,
     listDoctorsByConsultationType: handlers.handlers.doctorHandler.listDoctorsByConsultationType,
-
 });
 
 api.init();
