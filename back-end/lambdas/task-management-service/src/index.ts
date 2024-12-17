@@ -39,29 +39,16 @@ const api = new OpenAPIBackend({
 // Register Handlers
 api.register({
     postAuthLogin: handlers.handlers.loginHandler,
-    // postPatientImages: (c) => {
-    //     if (validateRoles(c.request.headers?.authorization, ["ADMIN"])) {
-    //         return handlers.postPatientImages();
-    //     } else {
-    //         return { statusCode: 403, body: { message: "Insufficient Roles" } };
-    //     }
-    // },
-    // getPatientTasks: handlers.getPatientTasks,
-    // getPatientTaskById: (c) => handlers.getPatientTaskById(c.request.params?.taskId),
-    // getDoctorTasks: handlers.getDoctorTasks,
-    // postAdminConsultationTypes: handlers.postAdminConsultationTypes,
-    // putAdminConsultationTypeById: (c) => handlers.putAdminConsultationTypeById(c.request.params?.id),
+    fetchFinancialRecords: handlers.handlers.financeHandler.fetchFinancialRecords,
     postTaskImages: handlers.handlers.taskHandler.postImageHandler,
     getTaskImages: handlers.handlers.taskHandler.getImagesByTaskHandler,
     patchTaskById: handlers.handlers.taskHandler.updateTaskHandler,
     postTasks: handlers.handlers.taskHandler.createTaskHandler,
     getDoctorTasks: handlers.handlers.taskHandler.getDoctorTasks,
     getPatientTasks: handlers.handlers.taskHandler.getPatientTasks,
-
     postAdminUsers: handlers.handlers.userHandler.createUser,
     putAdminUserById: handlers.handlers.userHandler.updateUser,
     deleteAdminUserById: handlers.handlers.userHandler.deleteUser,
-
     postAdminConsultationTypes: handlers.handlers.consultationTypeHandler.createConsultationTypeHandler,
     getAdminConsultationTypes: handlers.handlers.consultationTypeHandler.getConsultationTypesHandler,
     putAdminConsultationTypeById: handlers.handlers.consultationTypeHandler.updateConsultationTypeHandler,

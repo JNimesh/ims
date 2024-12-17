@@ -282,6 +282,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConsultationType'
+  /financial-records:
+    get:
+      operationId: fetchFinancialRecords
+      summary: Retrieve financial records by duration (daily or monthly)
+      description: |
+        Fetch financial records for a specific duration. Duration must be in either `DD-MM-YYYY` (daily) or `MM-YYYY` (monthly) format. You can optionally filter by `consultationType`.
+      tags:
+        - Financial Records
+      parameters:
+        - name: duration
+          in: query
+          required: true
+          description: The duration in `DD-MM-YYYY` (daily) or `MM-YYYY` (monthly) format.
+          schema:
+            type: string
+            example: "12-2023"
+        - name: consultationType
+          in: query
+          required: false
+          description: Filter financial records by consultation type.
+          schema:
+            type: string
+            example: "consultation_type_1"
+      responses:
+        '200':
+          description: List of financial records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FinancialRecord'
 components:
   securitySchemes:
     bearerAuth:
@@ -444,3 +476,20 @@ components:
         role:
           type: string
           enum: [ PATIENT, DOCTOR ]
+    FinancialRecord:
+      type: object
+      properties:
+        id:
+          type: string
+        consultationType:
+          type: string
+        patientCount:
+          type: integer
+        taskCount:
+          type: integer
+        totalRevenue:
+          type: number
+        duration:
+          type: string
+        updatedAt:
+          type: string
