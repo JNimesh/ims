@@ -52,6 +52,7 @@ api.register({
     postAdminConsultationTypes: handlers.handlers.consultationTypeHandler.createConsultationTypeHandler,
     getAdminConsultationTypes: handlers.handlers.consultationTypeHandler.getConsultationTypesHandler,
     putAdminConsultationTypeById: handlers.handlers.consultationTypeHandler.updateConsultationTypeHandler,
+    createDoctorCompetencies: handlers.handlers.doctorCompetencyHandler.createDoctorCompetenciesHandler,
 });
 
 api.init();

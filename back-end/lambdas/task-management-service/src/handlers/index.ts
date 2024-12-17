@@ -3,11 +3,13 @@ import * as userHandler   from "./userHandler";
 import * as consultationTypeHandler  from "./consultationTypeHandler";
 import * as taskHandler  from "./taskHandler";
 import * as financeHandler  from "./financeHandler";
+import * as doctorCompetencyHandler  from "./doctorCompetencyHandler";
 
 export const handlers = {
     loginHandler,
     userHandler,
     consultationTypeHandler,
     taskHandler,
-    financeHandler
+    financeHandler,
+    doctorCompetencyHandler
 };

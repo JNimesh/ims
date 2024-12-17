@@ -314,6 +314,49 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/FinancialRecord'
+  /doctor-competencies/bulk:
+    post:
+      operationId: createDoctorCompetencies
+      summary: Create multiple doctor competencies
+      tags:
+        - Doctor Competencies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                competencies:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      doctorId:
+                        type: string
+                        example: "doctor-id-123"
+                      consultationTypeId:
+                        type: string
+                        example: "consultation-type-id-456"
+                    required:
+                      - doctorId
+                      - consultationTypeId
+              required:
+                - competencies
+      responses:
+        '201':
+          description: Doctor competencies created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DoctorCompetency'
 components:
   securitySchemes:
     bearerAuth:
@@ -493,3 +536,15 @@ components:
           type: string
         updatedAt:
           type: string
+    DoctorCompetency:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "a1b2c3d4-5678-90ab-cdef-1234567890ab"
+        doctorId:
+          type: string
+          example: "doctor-id-123"
+        consultationTypeId:
+          type: string
+          example: "consultation-type-id-456"

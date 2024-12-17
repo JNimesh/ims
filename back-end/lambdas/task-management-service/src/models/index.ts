@@ -5,6 +5,7 @@ import {initConsultationType} from "./ConsultationType";
 import {initTask, Task} from "./Task";
 import {initImage, Image} from "./Image";
 import {initFinancialRecord, FinancialRecord} from "./FinancialRecord";
+import {initDoctorCompetency, DoctorCompetency} from "./DoctorCompetency";
 
 // Setup Sequelize to use SQLite
 const sequelize =
@@ -24,6 +25,7 @@ initConsultationType(sequelize);
 initTask(sequelize);
 initImage(sequelize);
 initFinancialRecord(sequelize);
+initDoctorCompetency(sequelize);
 
 // Define associations
 Patient.hasMany(Task, { foreignKey: 'patientId', as: 'tasks' });
