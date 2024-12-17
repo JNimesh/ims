@@ -357,6 +357,30 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/DoctorCompetency'
+  /doctors:
+    get:
+      operationId: listDoctorsByConsultationType
+      summary: List doctors by consultation type
+      description: Fetch a list of doctors who are competent in a specific consultation type.
+      tags:
+        - Doctors
+      parameters:
+        - name: consultationTypeId
+          in: query
+          required: true
+          description: ID of the consultation type to filter doctors
+          schema:
+            type: string
+            example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: List of doctors for the given consultation type
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Doctor'
 components:
   securitySchemes:
     bearerAuth:
@@ -548,3 +572,38 @@ components:
         consultationTypeId:
           type: string
           example: "consultation-type-id-456"
+    Doctor:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "doctor-123e4567-e89b-12d3-a456"
+        name:
+          type: string
+          example: "Dr. John Doe"
+        email:
+          type: string
+          example: "johndoe@example.com"
+        phone:
+          type: string
+          example: "+1234567890"
+        competencies:
+          type: array
+          items:
+            type: object
+            properties:
+              consultationTypeId:
+                type: string
+                example: "consultationType-123e4567"
+              consultationType:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: "General Consultation"
+                  description:
+                    type: string
+                    example: "Consultation for general health concerns"
+                  price:
+                    type: number
+                    example: 50.00

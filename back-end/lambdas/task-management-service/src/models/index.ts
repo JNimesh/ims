@@ -1,7 +1,7 @@
 import {Sequelize} from 'sequelize';
 import {initDoctor, Doctor} from './Doctor';
 import {initPatient, Patient} from './Patient';
-import {initConsultationType} from "./ConsultationType";
+import {initConsultationType, ConsultationType} from "./ConsultationType";
 import {initTask, Task} from "./Task";
 import {initImage, Image} from "./Image";
 import {initFinancialRecord, FinancialRecord} from "./FinancialRecord";
@@ -48,5 +48,12 @@ Image.belongsTo(Task, { foreignKey: 'taskId', as: 'task' });
         console.error('Error initializing database:', error);
     }
 })();
+
+// Define Associations
+Doctor.hasMany(DoctorCompetency, { foreignKey: "doctorId", as: "competencies" });
+DoctorCompetency.belongsTo(Doctor, { foreignKey: "doctorId", as: "doctor" });
+DoctorCompetency.belongsTo(ConsultationType, { foreignKey: "consultationTypeId", as: "consultationType" });
+ConsultationType.hasMany(DoctorCompetency, { foreignKey: "consultationTypeId", as: "competencies" });
+
 
 export {Doctor, Patient, Image, Task, FinancialRecord, sequelize};

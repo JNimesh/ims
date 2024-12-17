@@ -7,7 +7,6 @@ import yaml from "yaml";
 import jwt from "jsonwebtoken";
 import * as handlers from "./handlers";
 import './models';
-import {createConsultationTypeHandler} from "./handlers/consultationTypeHandler";
 
 // Helper to decode JWT and extract roles
 const getRolesFromToken = (authHeader?: string): string[] => {
@@ -53,6 +52,8 @@ api.register({
     getAdminConsultationTypes: handlers.handlers.consultationTypeHandler.getConsultationTypesHandler,
     putAdminConsultationTypeById: handlers.handlers.consultationTypeHandler.updateConsultationTypeHandler,
     createDoctorCompetencies: handlers.handlers.doctorCompetencyHandler.createDoctorCompetenciesHandler,
+    listDoctorsByConsultationType: handlers.handlers.doctorHandler.listDoctorsByConsultationType,
+
 });
 
 api.init();
