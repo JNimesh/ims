@@ -37,7 +37,24 @@ export interface UpdateUserRequest {
      * @memberof UpdateUserRequest
      */
     phone?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateUserRequest
+     */
+    role?: UpdateUserRequestRoleEnum;
 }
+
+
+/**
+ * @export
+ */
+export const UpdateUserRequestRoleEnum = {
+    Patient: 'PATIENT',
+    Doctor: 'DOCTOR'
+} as const;
+export type UpdateUserRequestRoleEnum = typeof UpdateUserRequestRoleEnum[keyof typeof UpdateUserRequestRoleEnum];
+
 
 /**
  * Check if a given object implements the UpdateUserRequest interface.
@@ -59,6 +76,7 @@ export function UpdateUserRequestFromJSONTyped(json: any, ignoreDiscriminator: b
         'name': json['name'] == null ? undefined : json['name'],
         'email': json['email'] == null ? undefined : json['email'],
         'phone': json['phone'] == null ? undefined : json['phone'],
+        'role': json['role'] == null ? undefined : json['role'],
     };
 }
 
@@ -76,6 +94,7 @@ export function UpdateUserRequestToJSONTyped(value?: UpdateUserRequest | null, i
         'name': value['name'],
         'email': value['email'],
         'phone': value['phone'],
+        'role': value['role'],
     };
 }
 

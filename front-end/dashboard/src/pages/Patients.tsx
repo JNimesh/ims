@@ -16,8 +16,8 @@ const PatientsPage: React.FC = () => {
     const fetchPatients = async () => {
         try {
             setLoading(true);
-            //const response = await api.({}); // Assuming `getPatients` exists in your API client
-            setPatients([]);
+            const response = await api.getPatients({}); // Assuming `getPatients` exists in your API client
+            setPatients(response);
         } catch (error) {
             message.error("Failed to load patients");
         } finally {
@@ -37,7 +37,7 @@ const PatientsPage: React.FC = () => {
                 // Update patient
                 await api.putUserById({
                     userId: editingPatient.id as string,
-                    updateUserRequest: values as UpdateUserRequest,
+                    updateUserRequest: {...(values as UpdateUserRequest), role: "PATIENT"},
                 });
                 message.success("Patient updated successfully");
             } else {
@@ -103,9 +103,10 @@ const PatientsPage: React.FC = () => {
                     <Form.Item name="name" label="Name" rules={[{required: true}]}>
                         <Input/>
                     </Form.Item>
-                    <Form.Item name="email" label="Email" rules={[{required: true, type: "email"}]}>
+                    {!editingPatient && <Form.Item name="email" label="Email" rules={[{required: true, type: "email"}]}>
                         <Input/>
                     </Form.Item>
+                    }
                     <Form.Item name="phone" label="Phone">
                         <Input/>
                     </Form.Item>
