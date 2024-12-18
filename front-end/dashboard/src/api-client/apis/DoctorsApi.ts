@@ -23,7 +23,7 @@ import {
 } from '../models/index';
 
 export interface ListDoctorsByConsultationTypeRequest {
-    consultationTypeId: string;
+    consultationTypeId?: string;
 }
 
 /**
@@ -36,13 +36,6 @@ export class DoctorsApi extends runtime.BaseAPI {
      * List doctors by consultation type
      */
     async listDoctorsByConsultationTypeRaw(requestParameters: ListDoctorsByConsultationTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Doctor>>> {
-        if (requestParameters['consultationTypeId'] == null) {
-            throw new runtime.RequiredError(
-                'consultationTypeId',
-                'Required parameter "consultationTypeId" was null or undefined when calling listDoctorsByConsultationType().'
-            );
-        }
-
         const queryParameters: any = {};
 
         if (requestParameters['consultationTypeId'] != null) {
@@ -65,7 +58,7 @@ export class DoctorsApi extends runtime.BaseAPI {
      * Fetch a list of doctors who are competent in a specific consultation type.
      * List doctors by consultation type
      */
-    async listDoctorsByConsultationType(requestParameters: ListDoctorsByConsultationTypeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Doctor>> {
+    async listDoctorsByConsultationType(requestParameters: ListDoctorsByConsultationTypeRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Doctor>> {
         const response = await this.listDoctorsByConsultationTypeRaw(requestParameters, initOverrides);
         return await response.value();
     }

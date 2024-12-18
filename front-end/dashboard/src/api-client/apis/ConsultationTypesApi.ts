@@ -45,7 +45,7 @@ export class ConsultationTypesApi extends runtime.BaseAPI {
     /**
      * Retrieve all consultation types
      */
-    async getAdminConsultationTypesRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ConsultationType>>> {
+    async getConsultationTypesRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<ConsultationType>>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -63,8 +63,8 @@ export class ConsultationTypesApi extends runtime.BaseAPI {
     /**
      * Retrieve all consultation types
      */
-    async getAdminConsultationTypes(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ConsultationType>> {
-        const response = await this.getAdminConsultationTypesRaw(initOverrides);
+    async getConsultationTypes(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<ConsultationType>> {
+        const response = await this.getConsultationTypesRaw(initOverrides);
         return await response.value();
     }
 

@@ -5,14 +5,6 @@ import {AWSError} from "aws-sdk";
 export const listDoctorsByConsultationType = async (context: Context): Promise<Record<string, any>> => {
     try {
         const consultationTypeId = context.request.query?.consultationTypeId;
-
-        if (!consultationTypeId) {
-            return {
-                statusCode: 400,
-                body: { message: "consultationTypeId is required" },
-            };
-        }
-
         const doctors = await getDoctorsByConsultationType(consultationTypeId);
 
         return {

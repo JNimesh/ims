@@ -28,7 +28,7 @@ import {
     UserToJSON,
 } from '../models/index';
 
-export interface DeleteAdminUserByIdRequest {
+export interface DeleteUserByIdRequest {
     userId: string;
 }
 
@@ -50,11 +50,11 @@ export class UsersAdminAccessOnlyApi extends runtime.BaseAPI {
      * Roles Allowed **Admin**
      * Remove a user
      */
-    async deleteAdminUserByIdRaw(requestParameters: DeleteAdminUserByIdRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async deleteUserByIdRaw(requestParameters: DeleteUserByIdRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
         if (requestParameters['userId'] == null) {
             throw new runtime.RequiredError(
                 'userId',
-                'Required parameter "userId" was null or undefined when calling deleteAdminUserById().'
+                'Required parameter "userId" was null or undefined when calling deleteUserById().'
             );
         }
 
@@ -76,8 +76,36 @@ export class UsersAdminAccessOnlyApi extends runtime.BaseAPI {
      * Roles Allowed **Admin**
      * Remove a user
      */
-    async deleteAdminUserById(requestParameters: DeleteAdminUserByIdRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.deleteAdminUserByIdRaw(requestParameters, initOverrides);
+    async deleteUserById(requestParameters: DeleteUserByIdRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.deleteUserByIdRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Roles Allowed **Admin**
+     * Retrieve all patients
+     */
+    async getPatientsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<User>>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/patients`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(UserFromJSON));
+    }
+
+    /**
+     * Roles Allowed **Admin**
+     * Retrieve all patients
+     */
+    async getPatients(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<User>> {
+        const response = await this.getPatientsRaw(initOverrides);
+        return await response.value();
     }
 
     /**
