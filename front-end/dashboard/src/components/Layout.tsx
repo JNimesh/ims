@@ -1,26 +1,42 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Layout, Menu } from "antd";
-import { Outlet, useNavigate } from "react-router-dom";
-import { signOut, getCurrentUser } from "@aws-amplify/auth";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 
 const { Header, Content, Sider } = Layout;
 
 const AppLayout: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        const roles = localStorage.getItem("roles")?.split(",") || [];
+        // Redirect to default menu item for Admin if logged in
+        if (roles.includes("ADMIN") && location.pathname === "/") {
+            navigate("/patients");
+        }
+    }, [location.pathname, navigate]);
 
     const handleSignOut = async () => {
-        await signOut();
+        localStorage.removeItem("token");
+        localStorage.removeItem("roles");
         navigate("/login");
     };
 
     const getMenuItems = () => {
         const roles = localStorage.getItem("roles")?.split(",") || [];
-        const menuItems = [];
+        const menuItems: any[] = [];
 
         if (roles.includes("ADMIN")) {
-            menuItems.push({ key: "/patients", label: "Patients" });
-            menuItems.push({ key: "/doctors", label: "Doctors" });
-            menuItems.push({ key: "/consultation-types", label: "Consultation Types" });
+            menuItems.push({
+                key: "admin",
+                label: "Admin",
+                type: "group", // Use 'group' for unclickable menu title
+                children: [
+                    { key: "/patients", label: "Patients" },
+                    { key: "/doctors", label: "Doctors" },
+                    { key: "/consultation-types", label: "Consultation Types" },
+                ],
+            });
         }
 
         return menuItems;
@@ -32,15 +48,16 @@ const AppLayout: React.FC = () => {
                 <Menu
                     theme="dark"
                     mode="inline"
+                    selectedKeys={[location.pathname]} // Highlight the active menu based on URL
                     onClick={({ key }) => navigate(key)}
                     items={getMenuItems()}
                 />
             </Sider>
             <Layout>
                 <Header style={{ color: "white", textAlign: "right" }}>
-          <span style={{ cursor: "pointer" }} onClick={handleSignOut}>
-            Sign Out
-          </span>
+                    <span style={{ cursor: "pointer" }} onClick={handleSignOut}>
+                        Sign Out
+                    </span>
                 </Header>
                 <Content style={{ margin: "16px" }}>
                     <Outlet />

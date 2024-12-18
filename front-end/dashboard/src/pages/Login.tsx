@@ -25,7 +25,9 @@ const Login: React.FC = () => {
             localStorage.setItem("roles", roles.join(","));
 
             message.success("Login successful!");
+
             navigate("/patients");
+
         } catch (error: any) {
             console.error("Login Error:", error);
             message.error(error.message || "Invalid email or password");

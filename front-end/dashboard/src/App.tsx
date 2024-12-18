@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import AppLayout from "./components/Layout";
+import Patients from "./pages/Patients";
 
 const App: React.FC = () => {
   return (
@@ -10,7 +11,7 @@ const App: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<AppLayout />}>
               <Route path="dashboard" element={<div>Dashboard</div>} />
-            <Route path="patients" element={<div>Patients Page</div>} />
+            <Route path="patients" element={<Patients/>} />
             <Route path="doctors" element={<div>Doctors Page</div>} />
             <Route path="consultation-types" element={<div>Consultation Types Page</div>} />
             <Route path="tasks" element={<div>Tasks Page</div>} />
