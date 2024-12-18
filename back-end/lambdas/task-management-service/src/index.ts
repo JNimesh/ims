@@ -102,7 +102,12 @@ export const lambdaHandler = async (
 
         return {
             statusCode: response.statusCode || 500,
-            headers: {"Content-Type": "application/json"},
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS, POST, GET, PUT, DELETE",
+                "Access-Control-Allow-Headers": "*",
+            },
             body: JSON.stringify(response.body),
         };
     } catch (error) {
@@ -110,6 +115,12 @@ export const lambdaHandler = async (
         return {
             statusCode: 500,
             body: JSON.stringify({message: "Internal server error", error: error}),
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS, POST, GET, PUT, DELETE",
+                "Access-Control-Allow-Headers": "*",
+            }
         };
     }
 };
