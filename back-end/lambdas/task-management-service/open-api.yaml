@@ -85,7 +85,6 @@ paths:
           required: true
           schema:
             type: string
-            format: uuid
       responses:
         '200':
           description: List of tasks assigned to the doctor
@@ -107,7 +106,6 @@ paths:
           required: true
           schema:
             type: string
-            format: uuid
       responses:
         '200':
           description: List of tasks associated with the patient
@@ -207,7 +205,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
     delete:
-      operationId: deleteAdminUserById
+      operationId: deleteUserById
       summary: Remove a user
       description: Roles Allowed **Admin**
       tags:
@@ -243,7 +241,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConsultationType'
     get:
-      operationId: getAdminConsultationTypes
+      operationId: getConsultationTypes
       summary: Retrieve all consultation types
       tags:
         - Consultation Types

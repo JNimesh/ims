@@ -38,6 +38,12 @@ Task.hasMany(Image, { foreignKey: 'taskId', as: 'images' });
 Image.belongsTo(Patient, { foreignKey: 'patientId', as: 'patient' });
 Image.belongsTo(Task, { foreignKey: 'taskId', as: 'task' });
 
+// Define Associations
+Doctor.hasMany(DoctorCompetency, { foreignKey: "doctorId", as: "competencies" });
+DoctorCompetency.belongsTo(Doctor, { foreignKey: "doctorId", as: "doctor" });
+DoctorCompetency.belongsTo(ConsultationType, { foreignKey: "consultationTypeId", as: "consultationType" });
+ConsultationType.hasMany(DoctorCompetency, { foreignKey: "consultationTypeId", as: "competencies" });
+
 (async () => {
     try {
         await sequelize.authenticate();
@@ -48,12 +54,6 @@ Image.belongsTo(Task, { foreignKey: 'taskId', as: 'task' });
         console.error('Error initializing database:', error);
     }
 })();
-
-// Define Associations
-Doctor.hasMany(DoctorCompetency, { foreignKey: "doctorId", as: "competencies" });
-DoctorCompetency.belongsTo(Doctor, { foreignKey: "doctorId", as: "doctor" });
-DoctorCompetency.belongsTo(ConsultationType, { foreignKey: "consultationTypeId", as: "consultationType" });
-ConsultationType.hasMany(DoctorCompetency, { foreignKey: "consultationTypeId", as: "competencies" });
 
 
 export {Doctor, Patient, Image, Task, FinancialRecord, sequelize};

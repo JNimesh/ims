@@ -59,6 +59,11 @@ export class BackendStack extends Stack {
 
             new apigateway.LambdaRestApi(this, `${service}-api`, {
                 handler: lambdaFunction,
+                defaultCorsPreflightOptions: {
+                    allowOrigins: apigateway.Cors.ALL_ORIGINS, // Allow all origins
+                    allowMethods: apigateway.Cors.ALL_METHODS, // Allow all HTTP methods
+                    allowHeaders: ['*']
+                },
             });
         });
     }

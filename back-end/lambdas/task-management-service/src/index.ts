@@ -109,7 +109,6 @@ export const lambdaHandler = async (
         console.error("Error:", error); // Log the error for debugging
         return {
             statusCode: 500,
-            headers: {"Content-Type": "application/json"},
             body: JSON.stringify({message: "Internal server error", error: error}),
         };
     }
