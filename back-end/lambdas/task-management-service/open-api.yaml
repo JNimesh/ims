@@ -219,7 +219,22 @@ paths:
       responses:
         '204':
           description: User removed
-
+  /patients:
+    get:
+      operationId: getPatients
+      summary: Retrieve all patients
+      description: Roles Allowed **Admin**
+      tags:
+        - Users (Admin Access Only)
+      responses:
+        '200':
+          description: List of patients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
   /consultation-types:
     post:
       operationId: postConsultationTypes
@@ -375,7 +390,6 @@ paths:
       parameters:
         - name: consultationTypeId
           in: query
-          required: true
           description: ID of the consultation type to filter doctors
           schema:
             type: string

@@ -8,7 +8,7 @@ export const getDoctorsByConsultationType = async (consultationTypeId: string) =
             {
                 model: DoctorCompetency,
                 as: "competencies", // Alias defined in the association
-                where: { consultationTypeId },
+                where: consultationTypeId ? { consultationTypeId } : {},
                 include: [
                     {
                         model: ConsultationType,

@@ -16,6 +16,12 @@ const sequelize =
         username: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME,
+        pool: {
+            max: 5,
+            min: 0,
+            idle: 10000,
+            acquire: 30000
+        }
     })
 
 // Initialize Models
@@ -43,17 +49,5 @@ Doctor.hasMany(DoctorCompetency, { foreignKey: "doctorId", as: "competencies" })
 DoctorCompetency.belongsTo(Doctor, { foreignKey: "doctorId", as: "doctor" });
 DoctorCompetency.belongsTo(ConsultationType, { foreignKey: "consultationTypeId", as: "consultationType" });
 ConsultationType.hasMany(DoctorCompetency, { foreignKey: "consultationTypeId", as: "competencies" });
-
-(async () => {
-    try {
-        await sequelize.authenticate();
-        console.log('Database connected successfully.');
-        // Sync models with database (use cautiously in production)
-        // await sequelize.sync({alter: true}); // or { force: true } for development only
-    } catch (error) {
-        console.error('Error initializing database:', error);
-    }
-})();
-
 
 export {Doctor, Patient, Image, Task, FinancialRecord, sequelize};

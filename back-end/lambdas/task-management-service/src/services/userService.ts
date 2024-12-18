@@ -46,3 +46,10 @@ export const deleteUserFromDb = async (userId: string, role: "DOCTOR" | "PATIENT
     return user;
 };
 
+export const listPatients = async () => {
+    const patientsFromDB=  await Patient.findAll({
+        where: {}
+    });
+    return patientsFromDB;
+}
+

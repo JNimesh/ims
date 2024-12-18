@@ -3,7 +3,7 @@ import {Patient, Doctor} from "../models";
 import {v4 as uuidv4} from "uuid";
 import AWS, {AWSError} from "aws-sdk";
 import {createCognitoUser, deleteCognitoUser} from "../services/cognitoService";
-import {createUserInDb, deleteUserFromDb, updateUserInDb} from "../services/userService";
+import {createUserInDb, deleteUserFromDb, listPatients, updateUserInDb} from "../services/userService";
 
 const getUserModel = (role: string) => {
     if (role === "doctor") return Doctor;
@@ -132,3 +132,19 @@ export const deleteUser = async (context: Context): Promise<Record<string, any>>
         };
     }
 };
+
+export const getPatients = async (context: Context): Promise<Record<string, any>> => {
+    try {
+        const patients = await listPatients();
+        return {
+            statusCode: 200,
+            body: patients,
+        };
+    } catch (error) {
+        console.error("Error getting patients:", error);
+        return {
+            statusCode: 500,
+            body: { message: "Internal server error", error: (error as AWSError).message },
+        };
+    }
+}

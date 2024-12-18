@@ -15,7 +15,7 @@ export class BackendStack extends Stack {
             const lambdaFunction = new lambda.Function(this, `${service}-lambda`, {
                 runtime: lambda.Runtime.NODEJS_20_X,
                 memorySize: 2048,
-                timeout: Duration.seconds(10),
+                timeout: Duration.seconds(30),
                 handler: "dist/index.lambdaHandler",
                 code: lambda.Code.fromAsset(`lambdas/${service}/build.zip`),
                 environment: {

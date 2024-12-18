@@ -6,7 +6,7 @@ import path from "path";
 import yaml from "yaml";
 import jwt from "jsonwebtoken";
 import * as handlers from "./handlers";
-import './models';
+import {sequelize} from "./models";
 
 // Helper to decode JWT and extract roles
 const getRolesFromToken = (authHeader?: string): string[] => {
@@ -46,6 +46,7 @@ api.register({
     getDoctorTasks: handlers.handlers.taskHandler.getDoctorTasks,
     getPatientTasks: handlers.handlers.taskHandler.getPatientTasks,
     postUsers: handlers.handlers.userHandler.createUser,
+    getPatients: handlers.handlers.userHandler.getPatients,
     putUserById: handlers.handlers.userHandler.updateUser,
     deleteUserById: handlers.handlers.userHandler.deleteUser,
     postConsultationTypes: handlers.handlers.consultationTypeHandler.createConsultationTypeHandler,
@@ -56,6 +57,7 @@ api.register({
 });
 
 api.init();
+sequelize.authenticate();
 
 export const lambdaHandler = async (
     event: APIGatewayProxyEvent,
