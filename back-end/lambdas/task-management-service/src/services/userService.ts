@@ -15,7 +15,6 @@ export const createUserInDb = async (
 export const updateUserInDb = async (
     userId: string,
     name: string,
-    email: string,
     phone: string | null,
     role: "DOCTOR" | "PATIENT"
 ) => {
@@ -26,11 +25,7 @@ export const updateUserInDb = async (
         throw new Error("User not found");
     }
 
-    if (email !== user.email) {
-        throw new Error("Cannot update email");
-    }
-
-    await user.update({ name, email, phone });
+    await user.update(phone ? { name, phone } : {name});
     return user;
 };
 

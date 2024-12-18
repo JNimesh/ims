@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import {AuthApi} from "../api-client";
 
-const Login: React.FC = () => {
+const LoginPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -24,12 +24,12 @@ const Login: React.FC = () => {
             localStorage.setItem("token", token);
             localStorage.setItem("roles", roles.join(","));
 
-            message.success("Login successful!");
+            message.success("LoginPage successful!");
 
             navigate("/patients");
 
         } catch (error: any) {
-            console.error("Login Error:", error);
+            console.error("LoginPage Error:", error);
             message.error(error.message || "Invalid email or password");
         } finally {
             setLoading(false);
@@ -37,7 +37,7 @@ const Login: React.FC = () => {
     };
 
     return (
-        <Card title="Login" style={{ width: 400, margin: "100px auto" }}>
+        <Card title="LoginPage" style={{ width: 400, margin: "100px auto" }}>
             <Form onFinish={onFinish} layout="vertical">
                 <Form.Item label="Email" name="email" rules={[{ required: true, message: "Email is required" }]}>
                     <Input placeholder="Enter your email" />
@@ -51,7 +51,7 @@ const Login: React.FC = () => {
                 </Form.Item>
                 <Form.Item>
                     <Button type="primary" htmlType="submit" loading={loading} block>
-                        Login
+                        LoginPage
                     </Button>
                 </Form.Item>
             </Form>
@@ -59,4 +59,4 @@ const Login: React.FC = () => {
     );
 };
 
-export default Login;
+export default LoginPage;

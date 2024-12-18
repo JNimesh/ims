@@ -62,8 +62,7 @@ export const createUser = async (context: Context): Promise<Record<string, any>>
 export const updateUser = async (context: Context): Promise<Record<string, any>> => {
     try {
         const userId = context.request.params?.userId;
-        const role = context.request.query?.role;
-        const { name, email, phone } = context.request.body;
+        const { name, phone, role } = context.request.body;
 
         if (!userId || !role) {
             return {
@@ -79,7 +78,7 @@ export const updateUser = async (context: Context): Promise<Record<string, any>>
             };
         }
 
-        const user = await updateUserInDb(userId, name, email, phone, role.toUpperCase() as "DOCTOR" | "PATIENT");
+        const user = await updateUserInDb(userId, name, phone, role.toUpperCase() as "DOCTOR" | "PATIENT");
 
         return {
             statusCode: 200,
