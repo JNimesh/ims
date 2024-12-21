@@ -36,6 +36,8 @@ const LoginPage: React.FC = () => {
                 navigate("/tasks");
             } else if (roles.includes("FINANCE")) {
                 navigate("/financial-records");
+            } else {
+                navigate("/login");
             }
 
         } catch (error: any) {

@@ -12,14 +12,17 @@ const AppLayout: React.FC = () => {
 
     useEffect(() => {
         const roles = localStorage.getItem("roles")?.split(",") || [];
-        // Redirect to default menu item based on roles
         if (roles.includes("ADMIN") && location.pathname === "/") {
             navigate("/patients");
-        }
-        if ((roles.includes("PATIENT") || roles.includes("DOCTOR")) && location.pathname === "/") {
+        } else if (roles.includes("PATIENT") && location.pathname === "/") {
             navigate("/tasks");
+        } else if (roles.includes("DOCTOR") && location.pathname === "/") {
+            navigate("/tasks");
+        } else if (roles.includes("FINANCE") && location.pathname === "/") {
+            navigate("/financial-records");
         }
     }, [location.pathname, navigate]);
+
 
     const handleSignOut = async () => {
         localStorage.removeItem("token");
