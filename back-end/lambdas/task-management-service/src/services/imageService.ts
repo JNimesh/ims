@@ -1,12 +1,13 @@
 import AWS from "aws-sdk";
-import {v4 as uuidv4} from "uuid";
-import {Image} from "../models";
+import { v4 as uuidv4 } from "uuid";
+import { Image } from "../models";
 
-const s3 = new AWS.S3(
-    {
-        region: 'ap-south-1',
-    }
-);
+const s3 = new AWS.S3({
+    region: "ap-south-1",
+    endpoint: "https://s3.ap-south-1.amazonaws.com", // Explicitly set the regional endpoint
+    signatureVersion: "v4", // Ensure the use of the correct signing version
+});
+
 const bucketName = process.env.S3_BUCKET_NAME!;
 
 // Upload Base64 Image to S3
@@ -43,17 +44,18 @@ export const saveImageRecord = async (
 
 // Get Images by Task
 export const getImagesByTask = async (taskId: string) => {
-    const images = await Image.findAll({where: {taskId}});
+    const images = await Image.findAll({ where: { taskId } });
 
     // Generate pre-signed URLs for each image
     const signedUrls = await Promise.all(
         images.map(async (image) => {
+            const key = image.url.split("/").pop(); // Extract the key from URL
             const signedUrl = s3.getSignedUrl("getObject", {
                 Bucket: bucketName,
-                Key: image.url.split("/").pop(), // Extract the key from URL
+                Key: key,
                 Expires: 60 * 5, // URL valid for 5 minutes
             });
-            return {...image.toJSON(), signedUrl};
+            return { ...image.toJSON(), signedUrl };
         })
     );
 

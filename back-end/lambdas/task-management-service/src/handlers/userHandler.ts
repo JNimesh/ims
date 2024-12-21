@@ -1,6 +1,6 @@
 import {Context} from "openapi-backend";
 import {Patient, Doctor} from "../models";
-import {v4 as uuidv4} from "uuid";
+// import {v4 as uuidv4} from "uuid";
 import AWS, {AWSError} from "aws-sdk";
 import {createCognitoUser, deleteCognitoUser} from "../services/cognitoService";
 import {createUserInDb, deleteUserFromDb, listPatients, updateUserInDb} from "../services/userService";
@@ -30,7 +30,7 @@ export const createUser = async (context: Context): Promise<Record<string, any>>
             };
         }
 
-        const randomPassword = uuidv4();
+        const randomPassword = "password@123";
 
         // Create user in Cognito
         const authId = await createCognitoUser(email, randomPassword, role);
