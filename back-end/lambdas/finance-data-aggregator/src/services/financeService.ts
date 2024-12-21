@@ -24,7 +24,7 @@ export const updateFinancialRecord = async (
             if (record) {
                 // Update existing record
                 record.taskCount += 1;
-                record.totalRevenue += price;
+                record.totalRevenue = Number(record.totalRevenue) + Number(price);
                 record.patientCount += 1; // Adjust logic based on your needs
                 record.updatedAt = new Date();
 
@@ -35,7 +35,7 @@ export const updateFinancialRecord = async (
                     {
                         consultationType,
                         taskCount: 1,
-                        totalRevenue: price,
+                        totalRevenue: Number(price),
                         patientCount: 1,
                         duration,
                     },
