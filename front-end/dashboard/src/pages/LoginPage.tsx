@@ -31,7 +31,7 @@ const LoginPage: React.FC = () => {
 
             if (roles.includes("ADMIN")) {
                 navigate("/patients");
-            } else if (roles.includes("PATIENT")) {
+            } else if (roles.includes("PATIENT") || roles.includes("DOCTOR")) {
                 navigate("/tasks");
             }
 

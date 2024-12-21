@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Table, Button, Modal, Form, Input, Upload, Select, message, Tag, Spin } from "antd";
-import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
-import { TasksApi, ImagesApi, ConsultationTypesApi, DoctorsApi } from "../api-client";
-import type { Task, ConsultationType, Doctor, Image } from "../api-client/models";
+import React, {useState, useEffect} from "react";
+import {Table, Button, Modal, Form, Input, Upload, Select, message, Tag, Spin} from "antd";
+import {PlusOutlined, UploadOutlined} from "@ant-design/icons";
+import {TasksApi, ImagesApi, ConsultationTypesApi, DoctorsApi} from "../api-client";
+import type {Task, ConsultationType, Doctor, Image} from "../api-client/models";
 
-const { Option } = Select;
+const {Option} = Select;
 
 const TasksPage: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -23,7 +23,8 @@ const TasksPage: React.FC = () => {
     const [fileList, setFileList] = useState<any[]>([]);
     const [form] = Form.useForm();
     const principal = JSON.parse(localStorage.getItem("token") || "{}");
-    const patientId = principal?.sub;
+    const isPatient = localStorage.getItem("roles")?.includes("PATIENT");
+    const userId = principal?.sub;
 
     const tasksApi = new TasksApi();
     const imagesApi = new ImagesApi();
@@ -33,11 +34,12 @@ const TasksPage: React.FC = () => {
     const fetchTasks = async () => {
         setLoading(true);
         try {
-            if (!patientId) {
-                message.error("Patient ID not found.");
+            if (!userId) {
+                message.error("User ID not found.");
                 return;
             }
-            const tasks = await tasksApi.getPatientTasks({ patientId });
+            const tasks = isPatient ? await tasksApi.getPatientTasks({patientId: userId}) : await tasksApi.getDoctorTasks({doctorId: userId});
+            tasks.sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
             setTasks(tasks);
         } catch (error) {
             console.error("Error fetching tasks:", error);
@@ -70,7 +72,7 @@ const TasksPage: React.FC = () => {
     const fetchTaskImages = async (taskId: string) => {
         setDetailsLoading(true);
         try {
-            const images = await imagesApi.getTaskImages({ taskId });
+            const images = await imagesApi.getTaskImages({taskId});
             setTaskImages(images);
         } catch (error) {
             console.error("Error fetching task images:", error);
@@ -83,7 +85,7 @@ const TasksPage: React.FC = () => {
     const handleCreateTask = async (values: { type: string; notes: string }) => {
         setFormLoading(true);
         try {
-            if (!patientId || !selectedType || !selectedDoctor) {
+            if (!userId || !selectedType || !selectedDoctor) {
                 message.error("Patient ID, Consultation Type, or Doctor not selected.");
                 return;
             }
@@ -91,7 +93,7 @@ const TasksPage: React.FC = () => {
                 createTaskRequest: {
                     type: selectedType,
                     notes: values.notes,
-                    patientId,
+                    patientId: userId,
                     doctorId: selectedDoctor,
                     status: "Open",
                     price: consultationTypes?.find((type) => type.id === selectedType)?.price,
@@ -106,7 +108,7 @@ const TasksPage: React.FC = () => {
                         taskId: newTask.id as string,
                         postImageRequest: {
                             ...base64Data,
-                            patientId,
+                            patientId: userId,
                         },
                     });
                 }
@@ -182,6 +184,12 @@ const TasksPage: React.FC = () => {
             ),
         },
         {
+            title: "Created At",
+            dataIndex: "createdAt",
+            key: "createdAt",
+            render: (date: string) => new Date(date).toLocaleString(),
+        },
+        {
             title: "Status",
             dataIndex: "status",
             key: "status",
@@ -199,7 +207,7 @@ const TasksPage: React.FC = () => {
             key: "images",
             render: (_: any, record: Task) => (
                 <Button type="link" onClick={() => handleViewDetails(record)}>
-                    View Details
+                    {isPatient || record.status === 'Closed' ? "View Details" : "Diagnose Report"}
                 </Button>
             ),
         },
@@ -207,14 +215,16 @@ const TasksPage: React.FC = () => {
 
     return (
         <div>
-            <Button
-                type="primary"
-                icon={<PlusOutlined/>}
-                onClick={() => setIsModalVisible(true)}
-                style={{marginBottom: "16px"}}
-            >
-                Create Task
-            </Button>
+            {
+                isPatient && <Button
+                    type="primary"
+                    icon={<PlusOutlined/>}
+                    onClick={() => setIsModalVisible(true)}
+                    style={{marginBottom: "16px"}}
+                >
+                    Create Task
+                </Button>
+            }
             <Table
                 columns={columns}
                 dataSource={tasks}
@@ -328,7 +338,7 @@ const TasksPage: React.FC = () => {
                                         key={index}
                                         src={image.signedUrl}
                                         alt={`Task Image ${index + 1}`}
-                                        style={{ width: "100%", marginBottom: 10 }}
+                                        style={{width: "100%", marginBottom: 10}}
                                     />
                                 ))}
                             </div>

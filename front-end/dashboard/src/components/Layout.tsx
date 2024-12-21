@@ -14,7 +14,7 @@ const AppLayout: React.FC = () => {
         if (roles.includes("ADMIN") && location.pathname === "/") {
             navigate("/patients");
         }
-        if (roles.includes("PATIENT") && location.pathname === "/") {
+        if ((roles.includes("PATIENT") || roles.includes("DOCTOR")) && location.pathname === "/") {
             navigate("/tasks");
         }
     }, [location.pathname, navigate]);
@@ -48,6 +48,16 @@ const AppLayout: React.FC = () => {
                 type: "group", // Use 'group' for unclickable menu title
                 children: [
                     { key: "/tasks", label: "Reports" }
+                ],
+            });
+        }
+        if (roles.includes("DOCTOR")) {
+            menuItems.push({
+                key: "doctor",
+                label: "Doctor",
+                type: "group", // Use 'group' for unclickable menu title
+                children: [
+                    { key: "/tasks", label: "Tasks" }
                 ],
             });
         }
