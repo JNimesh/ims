@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Define variables
-BUCKET_NAME="ims.jnimesh.com"
+BUCKET_NAME="ims-app.jnimesh.com"
 FRONTEND_DIR="./dashboard"
 BUILD_DIR="build"
+CLOUDFRONT_DISTRIBUTION_ID="E3E2KGLKG0WZ6L"
 
 # Ensure AWS CLI is configured
 if ! aws configure list > /dev/null 2>&1; then
@@ -47,3 +48,17 @@ aws s3api put-bucket-policy --bucket $BUCKET_NAME --policy '{
 
 # Print success message
 echo "Deployment to $BUCKET_NAME complete!"
+
+# Invalidate CloudFront cache
+echo "Invalidating CloudFront cache for distribution: $CLOUDFRONT_DISTRIBUTION_ID"
+INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*" --query 'Invalidation.Id' --output text)
+
+if [ $? -eq 0 ]; then
+    echo "CloudFront cache invalidation started with ID: $INVALIDATION_ID"
+else
+    echo "Failed to start CloudFront cache invalidation."
+    exit 1
+fi
+
+# Print success message
+echo "Deployment to $BUCKET_NAME complete! Cache invalidation in progress."
