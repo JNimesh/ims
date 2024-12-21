@@ -46,7 +46,7 @@ export const initFinancialRecord = (sequelize: Sequelize) => {
         {
             sequelize,
             modelName: 'FinancialRecord',
-            tableName: 'financial_records',
+            tableName: 'FinancialRecord',
             timestamps: false,
         }
     );
