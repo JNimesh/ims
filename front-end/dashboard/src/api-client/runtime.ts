@@ -68,11 +68,13 @@ export class Configuration {
     }
 
     get accessToken(): ((name?: string, scopes?: string[]) => string | Promise<string>) | undefined {
-        const accessToken = this.configuration.accessToken;
-        if (accessToken) {
-            return typeof accessToken === 'function' ? accessToken : async () => accessToken;
-        }
-        return undefined;
+        return async () => {
+            const token = localStorage.getItem('accessToken'); // Replace with your token retrieval logic
+            if (!token) {
+                throw new Error('Access token not found');
+            }
+            return token;
+        };
     }
 
     get headers(): HTTPHeaders | undefined {
@@ -203,10 +205,7 @@ export class BaseAPI {
         }
         let response: Response | undefined = undefined;
         try {
-            response = await (this.configuration.fetchApi || fetch)(fetchParams.url, {
-                ...fetchParams.init,
-                headers: {...fetchParams.init.headers, 'Authorization': `Bearer ${localStorage.getItem('accessToken')}`},
-            });
+            response = await (this.configuration.fetchApi || fetch)(fetchParams.url, fetchParams.init);
         } catch (e) {
             for (const middleware of this.middleware) {
                 if (middleware.onError) {
