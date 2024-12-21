@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {Table, Select, DatePicker, Card, Statistic, message, Row, Col, Spin, Button} from "antd";
 import {Bar, Pie} from "@ant-design/plots";
 import {ConsultationType, ConsultationTypesApi, FinancialRecordsApi} from "../api-client";
@@ -16,6 +16,8 @@ const FinanceReportingPage: React.FC = () => {
     const [totalTasks, setTotalTasks] = useState<number>(0);
     const [totalPatients, setTotalPatients] = useState<number>(0);
     const [consultationTypes, setConsultationTypes] = useState<ConsultationType[]>([]);
+    const lastSelected = useRef("");
+    const lastSelectedMode = useRef("Monthly");
 
     const financialRecordsApi = new FinancialRecordsApi();
     const consultationTypesApi = new ConsultationTypesApi();
@@ -38,7 +40,8 @@ const FinanceReportingPage: React.FC = () => {
             message.warning("Please select a duration.");
             return;
         }
-
+        lastSelected.current = duration;
+        lastSelectedMode.current = mode;
         setLoading(true);
         try {
             const records = await financialRecordsApi.fetchFinancialRecords({duration});
@@ -137,6 +140,11 @@ const FinanceReportingPage: React.FC = () => {
                         </Button>
                     </Col>
                 </Row>
+
+                {
+                    lastSelected.current && lastSelected.current &&
+                    <h2 style={{marginBottom: '10px'}}>{`You are seeing the results for ${lastSelectedMode.current} Financial Data for ${lastSelected.current}`}</h2>
+                }
 
                 <Row gutter={[16, 16]} style={{marginTop: "16px"}}>
                     <Col span={8}>
