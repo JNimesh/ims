@@ -32,6 +32,8 @@ paths:
   /tasks:
     post:
       summary: Create a new task
+      security:
+        - bearerAuth: []
       tags:
         - Tasks
       operationId: postTasks
@@ -50,6 +52,8 @@ paths:
                 $ref: '#/components/schemas/Task'
   /tasks/{taskId}:
     patch:
+      security:
+        - bearerAuth: []
       tags:
         - Tasks
       summary: Update a task
@@ -75,6 +79,8 @@ paths:
               $ref: '#/components/schemas/Task'
   /doctor/{doctorId}/tasks:
     get:
+      security:
+        - bearerAuth: []
       operationId: getDoctorTasks
       summary: Retrieve tasks assigned to a doctor
       tags:
@@ -97,6 +103,8 @@ paths:
   /patient/{patientId}/tasks:
     get:
       operationId: getPatientTasks
+      security:
+        - bearerAuth: []
       summary: Retrieve tasks for a patient
       tags:
         - Tasks
@@ -120,6 +128,8 @@ paths:
       summary: Upload an image for a task
       tags:
         - Images
+      security:
+        - bearerAuth: []
       parameters:
         - name: taskId
           in: path
@@ -139,6 +149,8 @@ paths:
     get:
       tags:
         - Images
+      security:
+        - bearerAuth: []
       parameters:
         - name: taskId
           in: path
@@ -160,6 +172,8 @@ paths:
   /users:
     post:
       operationId: postUsers
+      security:
+        - bearerAuth: []
       summary: Create a new user (patient or doctor)
       description: Roles Allowed **Admin**
       tags:
@@ -181,6 +195,8 @@ paths:
   /users/{userId}:
     put:
       operationId: putUserById
+      security:
+        - bearerAuth: []
       summary: Update details of an existing user
       description: Roles Allowed **Admin**
       tags:
@@ -206,6 +222,8 @@ paths:
                 $ref: '#/components/schemas/User'
     delete:
       operationId: deleteUserById
+      security:
+        - bearerAuth: []
       summary: Remove a user
       description: Roles Allowed **Admin**
       tags:
@@ -224,6 +242,8 @@ paths:
       operationId: getPatients
       summary: Retrieve all patients
       description: Roles Allowed **Admin**
+      security:
+        - bearerAuth: []
       tags:
         - Users (Admin Access Only)
       responses:
@@ -240,6 +260,8 @@ paths:
       operationId: postConsultationTypes
       summary: Add a new consultation type
       description: Roles Allowed **Admin**
+      security:
+        - bearerAuth: []
       tags:
         - Consultation Types
       requestBody:
@@ -258,6 +280,8 @@ paths:
     get:
       operationId: getConsultationTypes
       summary: Retrieve all consultation types
+      security:
+        - bearerAuth: []
       tags:
         - Consultation Types
       responses:
@@ -276,6 +300,8 @@ paths:
       summary: Update a consultation type
       tags:
         - Consultation Types
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -308,6 +334,8 @@ paths:
   /financial-records:
     get:
       operationId: fetchFinancialRecords
+      security:
+        - bearerAuth: []
       summary: Retrieve financial records by duration (daily or monthly)
       description: |
         Fetch financial records for a specific duration. Duration must be in either `DD-MM-YYYY` (daily) or `MM-YYYY` (monthly) format. You can optionally filter by `consultationType`.
@@ -341,6 +369,8 @@ paths:
     post:
       operationId: createDoctorCompetencies
       summary: Create multiple doctor competencies
+      security:
+        - bearerAuth: []
       tags:
         - Doctor Competencies
       requestBody:
@@ -383,6 +413,8 @@ paths:
   /doctors:
     get:
       operationId: listDoctorsByConsultationType
+      security:
+        - bearerAuth: []
       summary: List doctors by consultation type
       description: Fetch a list of doctors who are competent in a specific consultation type.
       tags:
