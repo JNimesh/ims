@@ -4,6 +4,19 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from "aws-cdk-lib/aws-iam";
 
+const ENV_VARS = {
+    DB_HOST: "task-management-db.c3omky0co1uh.ap-south-1.rds.amazonaws.com",
+    DB_PORT: "3306",
+    DB_NAME: "task_management",
+    DB_USER: "admin",
+    DB_PASSWORD: "admin123!",
+    REGION: 'ap-south-1',
+    USER_POOL_ID: "ap-south-1_uhIbqxelM",
+    CLIENT_ID: "3sbvcl7ifo0h8cve4takkme495",
+    CLIENT_SECRET: "6u0iu5no2b80hrs6dr4n8qt113bfoj42rc9se6uqo50fcaaue4v",
+    S3_BUCKET_NAME: "ims-data-s3",
+}
+
 export class BackendStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
@@ -15,11 +28,7 @@ export class BackendStack extends Stack {
             handler: 'dist/index.financeHandler',
             code: lambda.Code.fromAsset('lambdas/finance-data-aggregator/build.zip'),
             environment: {
-                DB_HOST: "task-management-db.c3omky0co1uh.ap-south-1.rds.amazonaws.com",
-                DB_PORT: "3306",
-                DB_NAME: "task_management",
-                DB_USER: "admin",
-                DB_PASSWORD: "42fAanya!",
+                ...ENV_VARS
             },
         });
 
@@ -30,7 +39,7 @@ export class BackendStack extends Stack {
             memorySize: 256,
             timeout: Duration.seconds(60),
             environment: {
-                REGION: 'ap-south-1',
+                REGION: ENV_VARS.REGION,
             },
         });
 
@@ -52,15 +61,7 @@ export class BackendStack extends Stack {
                 handler: "dist/index.lambdaHandler",
                 code: lambda.Code.fromAsset(`lambdas/${service}/build.zip`),
                 environment: {
-                    USER_POOL_ID: "ap-south-1_uhIbqxelM",
-                    CLIENT_ID: "3sbvcl7ifo0h8cve4takkme495",
-                    CLIENT_SECRET: "6u0iu5no2b80hrs6dr4n8qt113bfoj42rc9se6uqo50fcaaue4v",
-                    DB_HOST: "task-management-db.c3omky0co1uh.ap-south-1.rds.amazonaws.com",
-                    DB_PORT: "3306",
-                    DB_NAME: "task_management",
-                    DB_USER: "admin",
-                    DB_PASSWORD: "42fAanya!",
-                    S3_BUCKET_NAME: "ims-data-s3",
+                    ...ENV_VARS,
                     FINANCE_LAMBDA_ARN: financeLambda.functionArn,
                     NOTIFICATION_LAMBDA_ARN: notificationLambda.functionArn,
                 }
