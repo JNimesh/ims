@@ -51,29 +51,39 @@ const LoginPage: React.FC<LoginPageProps> = ({ setIsAuthenticated }) => {
     };
 
     return (
-        <Card title="Login Page" style={{ width: 400, margin: "100px auto" }}>
-            <Form onFinish={onFinish} layout="vertical">
-                <Form.Item
-                    label="Email"
-                    name="email"
-                    rules={[{ required: true, message: "Email is required" }]}
-                >
-                    <Input placeholder="Enter your email" />
-                </Form.Item>
-                <Form.Item
-                    label="Password"
-                    name="password"
-                    rules={[{ required: true, message: "Password is required" }]}
-                >
-                    <Input.Password placeholder="Enter your password" />
-                </Form.Item>
-                <Form.Item>
-                    <Button type="primary" htmlType="submit" loading={loading} block>
-                        Login
-                    </Button>
-                </Form.Item>
-            </Form>
-        </Card>
+        <div
+            style={{
+                backgroundColor: "#001529",
+                height: "100vh",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+            }}
+        >
+            <Card title="Login Page" style={{width: 400}}>
+                <Form onFinish={onFinish} layout="vertical">
+                    <Form.Item
+                        label="Email"
+                        name="email"
+                        rules={[{required: true, message: "Email is required"}]}
+                    >
+                        <Input placeholder="Enter your email"/>
+                    </Form.Item>
+                    <Form.Item
+                        label="Password"
+                        name="password"
+                        rules={[{required: true, message: "Password is required"}]}
+                    >
+                        <Input.Password placeholder="Enter your password"/>
+                    </Form.Item>
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit" loading={loading} block>
+                            Login
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Card>
+        </div>
     );
 };
 
