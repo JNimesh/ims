@@ -127,6 +127,7 @@ const TasksPage: React.FC = () => {
 
     const handleViewDetails = async (task: Task) => {
         setCurrentTask(task);
+        setTaskImages([]);
         setIsDetailsModalVisible(true);
         await fetchTaskImages(task.id as string);
     };
@@ -270,9 +271,9 @@ const TasksPage: React.FC = () => {
                                     ))}
                                 </Select>
                             </Form.Item>
-                            <Form.Item label="Notes" name="notes">
-                                <Input.TextArea placeholder="Enter task notes"/>
-                            </Form.Item>
+                            {/*<Form.Item label="Notes" name="notes">*/}
+                            {/*    <Input.TextArea placeholder="Enter task notes"/>*/}
+                            {/*</Form.Item>*/}
                             <Form.Item label="Images">
                                 <Upload
                                     beforeUpload={() => false}
@@ -315,9 +316,11 @@ const TasksPage: React.FC = () => {
                             <p>
                                 <strong>Price:</strong> ${currentTask.price}
                             </p>
-                            <p>
-                                <strong>Notes:</strong> {currentTask.notes}
-                            </p>
+                            {
+                                currentTask.status === "Closed" && <p>
+                                    <strong>Notes:</strong> {currentTask.notes}
+                                </p>
+                            }
                             <div>
                                 <strong>Images:</strong>
                                 {taskImages.map((image, index) => (
