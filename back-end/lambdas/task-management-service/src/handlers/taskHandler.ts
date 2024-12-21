@@ -120,13 +120,6 @@ export const getDoctorTasks = async (context: Context): Promise<Record<string, a
 
         const tasks = await getTasksByDoctorId(doctorId);
 
-        if (!tasks.length) {
-            return {
-                statusCode: 404,
-                body: { message: "No tasks found for the specified doctor" },
-            };
-        }
-
         return {
             statusCode: 200,
             body: tasks,
@@ -153,13 +146,6 @@ export const getPatientTasks = async (context: Context): Promise<Record<string, 
         }
 
         const tasks = await getTasksByPatientId(patientId);
-
-        if (!tasks.length) {
-            return {
-                statusCode: 404,
-                body: { message: "No tasks found for the specified patient" },
-            };
-        }
 
         return {
             statusCode: 200,

@@ -14,6 +14,9 @@ const AppLayout: React.FC = () => {
         if (roles.includes("ADMIN") && location.pathname === "/") {
             navigate("/patients");
         }
+        if (roles.includes("PATIENT") && location.pathname === "/") {
+            navigate("/tasks");
+        }
     }, [location.pathname, navigate]);
 
     const handleSignOut = async () => {
@@ -38,7 +41,16 @@ const AppLayout: React.FC = () => {
                 ],
             });
         }
-
+        if (roles.includes("PATIENT")) {
+            menuItems.push({
+                key: "patient",
+                label: "Patient",
+                type: "group", // Use 'group' for unclickable menu title
+                children: [
+                    { key: "/tasks", label: "Reports" }
+                ],
+            });
+        }
         return menuItems;
     };
 

@@ -5,6 +5,7 @@ import AppLayout from "./components/Layout";
 import Patients from "./pages/PatientsPage";
 import DoctorsPage from "./pages/DoctorsPage";
 import ConsultaionTypesPage from "./pages/ConsultaionTypesPage";
+import TasksPage from "./pages/TasksPage";
 
 const App: React.FC = () => {
   return (
@@ -16,7 +17,7 @@ const App: React.FC = () => {
             <Route path="patients" element={<Patients/>} />
             <Route path="doctors" element={<DoctorsPage/>} />
             <Route path="consultation-types" element={<ConsultaionTypesPage/>} />
-            <Route path="tasks" element={<div>Tasks Page</div>} />
+            <Route path="tasks" element={<TasksPage/>} />
             <Route path="financial-records" element={<div>Financial Records Page</div>} />
             <Route path="my-tasks" element={<div>My Tasks Page</div>} />
           </Route>

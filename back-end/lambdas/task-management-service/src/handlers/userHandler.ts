@@ -42,7 +42,7 @@ export const createUser = async (context: Context): Promise<Record<string, any>>
             };
         } else {
             // Create user in database
-            const user = await createUserInDb(uuidv4(), name, email, phone, authId, role);
+            const user = await createUserInDb(authId, name, email, phone, authId, role);
 
             return {
                 statusCode: 201,

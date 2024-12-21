@@ -21,12 +21,19 @@ const LoginPage: React.FC = () => {
             const roles = decodedToken["cognito:groups"] || [];
 
             // Store token and roles in localStorage
-            localStorage.setItem("token", token);
+            localStorage.setItem("token", JSON.stringify(decodedToken));
             localStorage.setItem("roles", roles.join(","));
+
+            console.log("LoginPage token:", decodedToken);
+            console.log("LoginPage token:", roles.join(","));
 
             message.success("LoginPage successful!");
 
-            navigate("/patients");
+            if (roles.includes("ADMIN")) {
+                navigate("/patients");
+            } else if (roles.includes("PATIENT")) {
+                navigate("/tasks");
+            }
 
         } catch (error: any) {
             console.error("LoginPage Error:", error);
