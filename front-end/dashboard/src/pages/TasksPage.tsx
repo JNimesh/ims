@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {Table, Button, Modal, Form, Input, Upload, Select, message} from "antd";
+import {Table, Button, Modal, Form, Input, Upload, Select, message, Tag} from "antd";
 import {PlusOutlined, UploadOutlined} from "@ant-design/icons";
 import {TasksApi, ImagesApi, ConsultationTypesApi, DoctorsApi} from "../api-client";
 import type {Task, ConsultationType, Doctor} from "../api-client/models";
@@ -150,11 +150,24 @@ const TasksPage: React.FC = () => {
             title: "Type",
             dataIndex: "type",
             key: "type",
+            render: (type: string) => (
+                <Tag color="geekblue" key={type}>
+                    {consultationTypes.find((t) => t.id === type)?.type}
+                </Tag>
+            ),
         },
         {
-            title: "Notes",
-            dataIndex: "notes",
-            key: "notes",
+            title: "Status",
+            dataIndex: "status",
+            key: "status",
+            render: (status: string) => (
+               <Tag color={status === "Open" ? "blue" : "green"}>{status}</Tag>
+            ),
+        },
+        {
+            title: "Price",
+            dataIndex: "price",
+            key: "price",
         },
         {
             title: "Images",
