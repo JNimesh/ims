@@ -53,7 +53,7 @@ export const getImagesByTask = async (taskId: string) => {
             const signedUrl = s3.getSignedUrl("getObject", {
                 Bucket: bucketName,
                 Key: key,
-                Expires: 60 * 5, // URL valid for 5 minutes
+                Expires: 60 * 10, // URL valid for 60 minutes
             });
             return { ...image.toJSON(), signedUrl };
         })

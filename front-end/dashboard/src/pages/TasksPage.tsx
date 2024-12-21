@@ -42,6 +42,10 @@ const TasksPage: React.FC = () => {
         form.resetFields();
     }, [isModalVisible]);
 
+    useEffect(() => {
+        notesForm.resetFields();
+    }, [isDetailsModalVisible]);
+
     const handleCreateTask = async (values: { type: string; notes: string }) => {
         setFormLoading(true);
         try {

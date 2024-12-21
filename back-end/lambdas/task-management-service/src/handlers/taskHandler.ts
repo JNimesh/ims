@@ -167,7 +167,7 @@ export const updateTaskHandler = async (context: Context): Promise<Record<string
         }
         const task = await updateTask(taskId, updates);
 
-        if (updates.status?.toUpperCase() === 'COMPLETED') {
+        if (updates.status?.toUpperCase() === 'CLOSED') {
             await sendNotificationForReportDiagnosisComplete(task);
         }
         return {
