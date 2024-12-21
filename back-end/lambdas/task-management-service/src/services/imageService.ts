@@ -3,6 +3,9 @@ import {v4 as uuidv4} from "uuid";
 import {Image} from "../models";
 
 const s3 = new AWS.S3();
+AWS.config.update({
+    region: 'ap-south-1',
+});
 const bucketName = process.env.S3_BUCKET_NAME!;
 
 // Upload Base64 Image to S3
