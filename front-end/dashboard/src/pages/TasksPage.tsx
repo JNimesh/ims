@@ -24,6 +24,7 @@ const TasksPage: React.FC = () => {
     const [fileList, setFileList] = useState<any[]>([]);
     const [form] = Form.useForm();
     const [notesForm] = Form.useForm();
+    const [createFormStepOne] = Form.useForm();
     const principal = JSON.parse(localStorage.getItem("token") || "{}");
     const isPatient = localStorage.getItem("roles")?.includes("PATIENT");
     const userId = principal?.sub;
@@ -32,6 +33,14 @@ const TasksPage: React.FC = () => {
     const imagesApi = new ImagesApi();
     const consultationTypesApi = new ConsultationTypesApi();
     const doctorsApi = new DoctorsApi();
+
+    useEffect(() => {
+        setSelectedType(null);
+        setSelectedDoctor(null);
+        setCurrentStep(1);
+        createFormStepOne.resetFields();
+        form.resetFields();
+    }, [isModalVisible]);
 
     const handleCreateTask = async (values: { type: string; notes: string }) => {
         setFormLoading(true);
@@ -261,7 +270,7 @@ const TasksPage: React.FC = () => {
             >
                 {currentStep === 1 ? (
                     <>
-                        <Form>
+                        <Form form={createFormStepOne}>
                             <Form.Item label="Select Consultation Type">
                                 <Select
                                     placeholder="Select a consultation type"
@@ -300,9 +309,6 @@ const TasksPage: React.FC = () => {
                                     ))}
                                 </Select>
                             </Form.Item>
-                            {/*<Form.Item label="Notes" name="notes">*/}
-                            {/*    <Input.TextArea placeholder="Enter task notes"/>*/}
-                            {/*</Form.Item>*/}
                             <Form.Item label="Images">
                                 <Upload
                                     beforeUpload={() => false}
