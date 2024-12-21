@@ -60,7 +60,7 @@ export class BackendStack extends Stack {
                     DB_NAME: "task_management",
                     DB_USER: "admin",
                     DB_PASSWORD: "42fAanya!",
-                    S3_BUCKET_NAME: "ims-data-bucket",
+                    S3_BUCKET_NAME: "ims-data-s3",
                     FINANCE_LAMBDA_ARN: financeLambda.functionArn,
                     NOTIFICATION_LAMBDA_ARN: notificationLambda.functionArn,
                 }
@@ -88,7 +88,7 @@ export class BackendStack extends Stack {
                         "s3:DeleteObject",
                         "s3:ListBucket",
                     ],
-                    resources: [`arn:aws:s3:::ims-data-bucket/*`],
+                    resources: [`arn:aws:s3:::ims-data-s3/*`],
                 })
             );
 
