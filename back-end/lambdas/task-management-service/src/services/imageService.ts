@@ -8,13 +8,13 @@ const bucketName = process.env.S3_BUCKET_NAME!;
 // Upload Base64 Image to S3
 export const uploadImageToS3 = async (base64Data: string, fileType: string) => {
     const buffer = Buffer.from(base64Data, "base64");
-    const fileName = `${uuidv4()}.${fileType}`;
+    const fileName = `${uuidv4()}.${fileType.split("/")[1]}`;
 
     const params = {
         Bucket: bucketName,
         Key: fileName,
         Body: buffer,
-        ContentType: `image/${fileType}`
+        ContentType: fileType,
     };
 
     const result = await s3.upload(params).promise();
