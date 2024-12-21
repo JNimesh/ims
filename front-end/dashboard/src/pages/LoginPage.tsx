@@ -2,9 +2,13 @@ import React, { useState } from "react";
 import { Button, Card, Input, Form, message } from "antd";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
-import {AuthApi} from "../api-client";
+import { AuthApi } from "../api-client";
 
-const LoginPage: React.FC = () => {
+interface LoginPageProps {
+    setIsAuthenticated: (auth: boolean) => void;
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ setIsAuthenticated }) => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -13,7 +17,7 @@ const LoginPage: React.FC = () => {
 
         try {
             setLoading(true);
-            const response = await (new AuthApi()).postAuthLogin({loginRequest: {email, password}});
+            const response = await new AuthApi().postAuthLogin({ loginRequest: { email, password } });
             const token = response.accessToken as string;
 
             // Decode roles from token (JWT)
@@ -25,10 +29,9 @@ const LoginPage: React.FC = () => {
             localStorage.setItem("roles", roles.join(","));
             localStorage.setItem("email", email);
 
-            console.log("LoginPage token:", decodedToken);
-            console.log("LoginPage token:", roles.join(","));
+            setIsAuthenticated(true);
 
-            message.success("LoginPage successful!");
+            message.success("Login successful!");
 
             if (roles.includes("ADMIN")) {
                 navigate("/patients");
@@ -39,9 +42,8 @@ const LoginPage: React.FC = () => {
             } else {
                 navigate("/login");
             }
-
         } catch (error: any) {
-            console.error("LoginPage Error:", error);
+            console.error("Login Error:", error);
             message.error(error.message || "Invalid email or password");
         } finally {
             setLoading(false);
@@ -51,7 +53,11 @@ const LoginPage: React.FC = () => {
     return (
         <Card title="Login Page" style={{ width: 400, margin: "100px auto" }}>
             <Form onFinish={onFinish} layout="vertical">
-                <Form.Item label="Email" name="email" rules={[{ required: true, message: "Email is required" }]}>
+                <Form.Item
+                    label="Email"
+                    name="email"
+                    rules={[{ required: true, message: "Email is required" }]}
+                >
                     <Input placeholder="Enter your email" />
                 </Form.Item>
                 <Form.Item
