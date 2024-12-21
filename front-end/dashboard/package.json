@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ant-design/plots": "^2.3.2",
     "@aws-amplify/auth": "^6.8.3",
     "@aws-amplify/core": "^6.7.3",
     "@openapitools/openapi-generator-cli": "^2.15.3",
     "antd": "^5.22.5",
     "cra-template-typescript": "1.2.0",
+    "dayjs": "^1.11.13",
     "jwt-decode": "^4.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

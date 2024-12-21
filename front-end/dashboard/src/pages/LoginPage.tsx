@@ -33,6 +33,8 @@ const LoginPage: React.FC = () => {
                 navigate("/patients");
             } else if (roles.includes("PATIENT") || roles.includes("DOCTOR")) {
                 navigate("/tasks");
+            } else if (roles.includes("FINANCE")) {
+                navigate("/financial-records");
             }
 
         } catch (error: any) {

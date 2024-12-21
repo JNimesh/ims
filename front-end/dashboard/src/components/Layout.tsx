@@ -61,6 +61,17 @@ const AppLayout: React.FC = () => {
                 ],
             });
         }
+
+        if (roles.includes("FINANCE")) {
+            menuItems.push({
+                key: "finance",
+                label: "Finance",
+                type: "group", // Use 'group' for unclickable menu title
+                children: [
+                    { key: "/financial-records", label: "Financial Records" }
+                ],
+            });
+        }
         return menuItems;
     };
 
