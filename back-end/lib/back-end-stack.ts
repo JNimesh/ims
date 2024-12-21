@@ -25,8 +25,8 @@ export class BackendStack extends Stack {
 
         const notificationLambda = new lambda.Function(this, "NotificationServiceLambda", {
             runtime: lambda.Runtime.NODEJS_20_X,
-            handler: "index.handler",
-            code: lambda.Code.fromAsset(path.join(__dirname, "../notification-service")),
+            handler: "dist/index.handler",
+            code: lambda.Code.fromAsset('lambdas/notification-service/build.zip'),
             memorySize: 256,
             timeout: Duration.seconds(60),
             environment: {

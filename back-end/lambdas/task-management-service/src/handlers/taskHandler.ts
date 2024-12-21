@@ -2,9 +2,36 @@ import {Context} from "openapi-backend";
 import {createTask, getTasksByDoctorId, getTasksByPatientId, updateTask} from "../services/taskService";
 import {getImagesByTask, saveImageRecord, uploadImageToS3} from "../services/imageService";
 import {AWSError} from "aws-sdk";
-import {Lambda} from 'aws-sdk'; // Import AWS SDK for Lambda
+import {Lambda} from 'aws-sdk';
+import {Doctor, Patient, Task} from "../models"; // Import AWS SDK for Lambda
 
 const lambda = new Lambda();
+
+async function sendNotificationForReportAssignment(doctorId: string, patientId: string, task: Task) {
+    if (doctorId && patientId) {
+        const doctor = await Doctor.findByPk(doctorId); // Fetch the doctor's email and name from the database
+        const patient = await Patient.findByPk(patientId); // Fetch the patient's name from the database
+        const notificationPayload = {
+            templateName: "NewReportAssigned",
+            recipientEmail: doctor?.email,
+            templateData: {
+                doctorName: doctor?.name,
+                reportId: task.id,
+                patientName: patient?.name, // Replace with the patient's name fetched from the database
+                assignedDate: new Date().toISOString(),
+            },
+        };
+
+        // Invoke the notification Lambda function asynchronously
+        await lambda
+            .invoke({
+                FunctionName: process.env.NOTIFICATION_LAMBDA_ARN as string, // Replace with your notification Lambda ARN
+                InvocationType: "Event",
+                Payload: JSON.stringify(notificationPayload),
+            })
+            .promise();
+    }
+}
 
 export const createTaskHandler = async (context: Context): Promise<Record<string, any>> => {
     try {
@@ -31,6 +58,9 @@ export const createTaskHandler = async (context: Context): Promise<Record<string
             InvocationType: 'Event', // Asynchronous invocation
             Payload: JSON.stringify(financePayload),
         }).promise();
+
+        // If a doctor is assigned, send a notification to the doctor
+        await sendNotificationForReportAssignment(doctorId, patientId, task);
 
         return {
             statusCode: 201,
@@ -97,6 +127,33 @@ export const postImageHandler = async (context: Context): Promise<Record<string,
 };
 
 
+async function sendNotificationForReportDiagnosisComplete(task: Task) {
+    const patientId = task.patientId;
+    const doctorId = task.doctorId;
+    if (doctorId && patientId) {
+        const doctor = await Doctor.findByPk(doctorId); // Fetch the doctor's email and name from the database
+        const patient = await Patient.findByPk(patientId); // Fetch the patient's name from the database
+        const notificationPayload = {
+            templateName: "ReportDiagnosisComplete",
+            recipientEmail: patient?.email,
+            templateData: {
+                doctorName: doctor?.name,
+                reportId: task.id,
+                patientName: patient?.name, // Replace with the patient's name fetched from the database
+                completedDate: new Date().toISOString(),
+            },
+        };
+        // Invoke the notification Lambda function asynchronously
+        await lambda
+            .invoke({
+                FunctionName: process.env.NOTIFICATION_LAMBDA_ARN as string, // Replace with your notification Lambda ARN
+                InvocationType: "Event",
+                Payload: JSON.stringify(notificationPayload),
+            })
+            .promise();
+    }
+}
+
 export const updateTaskHandler = async (context: Context): Promise<Record<string, any>> => {
     try {
         const taskId = context.request.params?.taskId;
@@ -109,6 +166,10 @@ export const updateTaskHandler = async (context: Context): Promise<Record<string
             };
         }
         const task = await updateTask(taskId, updates);
+
+        if (updates.status?.toUpperCase() === 'COMPLETED') {
+            await sendNotificationForReportDiagnosisComplete(task);
+        }
         return {
             statusCode: 200,
             body: task,
