@@ -23,6 +23,7 @@ const LoginPage: React.FC = () => {
             // Store token and roles in localStorage
             localStorage.setItem("token", JSON.stringify(decodedToken));
             localStorage.setItem("roles", roles.join(","));
+            localStorage.setItem("email", email);
 
             console.log("LoginPage token:", decodedToken);
             console.log("LoginPage token:", roles.join(","));
@@ -46,7 +47,7 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <Card title="LoginPage" style={{ width: 400, margin: "100px auto" }}>
+        <Card title="Login Page" style={{ width: 400, margin: "100px auto" }}>
             <Form onFinish={onFinish} layout="vertical">
                 <Form.Item label="Email" name="email" rules={[{ required: true, message: "Email is required" }]}>
                     <Input placeholder="Enter your email" />
@@ -60,7 +61,7 @@ const LoginPage: React.FC = () => {
                 </Form.Item>
                 <Form.Item>
                     <Button type="primary" htmlType="submit" loading={loading} block>
-                        LoginPage
+                        Login
                     </Button>
                 </Form.Item>
             </Form>

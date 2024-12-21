@@ -1,16 +1,18 @@
 import React, { useEffect } from "react";
-import { Layout, Menu } from "antd";
+import { Layout, Menu, Typography, Space } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 
 const { Header, Content, Sider } = Layout;
+const { Text } = Typography;
 
 const AppLayout: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const userRole = (localStorage.getItem("roles")?.split(",") || [])[0];
 
     useEffect(() => {
         const roles = localStorage.getItem("roles")?.split(",") || [];
-        // Redirect to default menu item for Admin if logged in
+        // Redirect to default menu item based on roles
         if (roles.includes("ADMIN") && location.pathname === "/") {
             navigate("/patients");
         }
@@ -32,8 +34,8 @@ const AppLayout: React.FC = () => {
         if (roles.includes("ADMIN")) {
             menuItems.push({
                 key: "admin",
-                label: "Admin",
-                type: "group", // Use 'group' for unclickable menu title
+                label: <Text strong>Admin</Text>,
+                type: "group",
                 children: [
                     { key: "/patients", label: "Patients" },
                     { key: "/doctors", label: "Doctors" },
@@ -44,8 +46,8 @@ const AppLayout: React.FC = () => {
         if (roles.includes("PATIENT")) {
             menuItems.push({
                 key: "patient",
-                label: "Patient",
-                type: "group", // Use 'group' for unclickable menu title
+                label: <Text strong>Patient</Text>,
+                type: "group",
                 children: [
                     { key: "/tasks", label: "Reports" }
                 ],
@@ -54,8 +56,8 @@ const AppLayout: React.FC = () => {
         if (roles.includes("DOCTOR")) {
             menuItems.push({
                 key: "doctor",
-                label: "Doctor",
-                type: "group", // Use 'group' for unclickable menu title
+                label: <Text strong>Doctor</Text>,
+                type: "group",
                 children: [
                     { key: "/tasks", label: "Tasks" }
                 ],
@@ -65,8 +67,8 @@ const AppLayout: React.FC = () => {
         if (roles.includes("FINANCE")) {
             menuItems.push({
                 key: "finance",
-                label: "Finance",
-                type: "group", // Use 'group' for unclickable menu title
+                label: <Text strong>Finance</Text>,
+                type: "group",
                 children: [
                     { key: "/financial-records", label: "Financial Records" }
                 ],
@@ -77,22 +79,45 @@ const AppLayout: React.FC = () => {
 
     return (
         <Layout style={{ minHeight: "100vh" }}>
-            <Sider>
+            <Sider theme="dark" breakpoint="lg" collapsedWidth="0" style={{ backgroundColor: "#001529" }} width={240}>
+                <div style={{ height: "64px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Typography.Title level={4} style={{ color: "white", margin: 0 }}>{`${userRole} Dashboard`}
+                    </Typography.Title>
+                </div>
                 <Menu
                     theme="dark"
                     mode="inline"
-                    selectedKeys={[location.pathname]} // Highlight the active menu based on URL
+                    selectedKeys={[location.pathname]}
                     onClick={({ key }) => navigate(key)}
                     items={getMenuItems()}
+                    style={{ marginTop: "16px" }}
                 />
             </Sider>
             <Layout>
-                <Header style={{ color: "white", textAlign: "right" }}>
-                    <span style={{ cursor: "pointer" }} onClick={handleSignOut}>
+                <Header
+                    style={{
+                        backgroundColor: "#001529",
+                        padding: "0 24px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        boxShadow: "0 2px 8px #f0f1f2",
+                    }}
+                >
+                    <Space>
+                        <Text strong style={{ color: "#fff" }}>
+                            {`Welcome ${localStorage.getItem("email")}`}
+                        </Text>
+                    </Space>
+                    <Text
+                        style={{ cursor: "pointer", color: "#fff" }}
+                        onClick={handleSignOut}
+                        strong
+                    >
                         Sign Out
-                    </span>
+                    </Text>
                 </Header>
-                <Content style={{ margin: "16px" }}>
+                <Content style={{ margin: "24px 16px", padding: 24, backgroundColor: "#fff", borderRadius: "8px" }}>
                     <Outlet />
                 </Content>
             </Layout>

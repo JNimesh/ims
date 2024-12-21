@@ -255,12 +255,12 @@ const TasksPage: React.FC = () => {
                     onClick={() => setIsModalVisible(true)}
                     style={{ marginBottom: "16px" }}
                 >
-                    Create Task
+                    Create Report Diagnosis
                 </Button>
             )}
             <Table columns={columns} dataSource={tasks} rowKey="id" loading={loading} />
             <Modal
-                title="Create Task"
+                title="Create Report Diagnosis"
                 visible={isModalVisible}
                 onCancel={() => {
                     setIsModalVisible(false);

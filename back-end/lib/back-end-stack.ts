@@ -23,6 +23,25 @@ export class BackendStack extends Stack {
             },
         });
 
+        const notificationLambda = new lambda.Function(this, "NotificationServiceLambda", {
+            runtime: lambda.Runtime.NODEJS_20_X,
+            handler: "index.handler",
+            code: lambda.Code.fromAsset(path.join(__dirname, "../notification-service")),
+            memorySize: 256,
+            timeout: Duration.seconds(60),
+            environment: {
+                REGION: 'ap-south-1',
+            },
+        });
+
+        // Grant SES permissions to the Lambda
+        notificationLambda.addToRolePolicy(
+            new iam.PolicyStatement({
+                actions: ["ses:SendTemplatedEmail", "ses:SendEmail"],
+                resources: ["*"], // Optionally restrict to specific identities
+            })
+        );
+
         const services = ['task-management-service'];
 
         services.forEach((service) => {
@@ -43,6 +62,7 @@ export class BackendStack extends Stack {
                     DB_PASSWORD: "42fAanya!",
                     S3_BUCKET_NAME: "ims-data-bucket",
                     FINANCE_LAMBDA_ARN: financeLambda.functionArn,
+                    NOTIFICATION_LAMBDA_ARN: notificationLambda.functionArn,
                 }
             });
 
@@ -77,7 +97,7 @@ export class BackendStack extends Stack {
                     actions: [
                         "lambda:InvokeFunction",
                     ],
-                    resources: [financeLambda.functionArn],
+                    resources: [financeLambda.functionArn, notificationLambda.functionArn],
                 })
             )
 
