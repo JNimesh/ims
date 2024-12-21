@@ -1,10 +1,10 @@
-import React, {useState, useEffect} from "react";
-import {Table, Button, Modal, Form, Input, Upload, Select, message, Tag} from "antd";
-import {PlusOutlined, UploadOutlined} from "@ant-design/icons";
-import {TasksApi, ImagesApi, ConsultationTypesApi, DoctorsApi} from "../api-client";
-import type {Task, ConsultationType, Doctor} from "../api-client/models";
+import React, { useState, useEffect } from "react";
+import { Table, Button, Modal, Form, Input, Upload, Select, message, Tag, Spin } from "antd";
+import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import { TasksApi, ImagesApi, ConsultationTypesApi, DoctorsApi } from "../api-client";
+import type { Task, ConsultationType, Doctor, Image } from "../api-client/models";
 
-const {Option} = Select;
+const { Option } = Select;
 
 const TasksPage: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -14,6 +14,11 @@ const TasksPage: React.FC = () => {
     const [selectedDoctor, setSelectedDoctor] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
+    const [currentTask, setCurrentTask] = useState<Task | null>(null);
+    const [taskImages, setTaskImages] = useState<Image[]>([]);
+    const [detailsLoading, setDetailsLoading] = useState(false);
+    const [formLoading, setFormLoading] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
     const [fileList, setFileList] = useState<any[]>([]);
     const [form] = Form.useForm();
@@ -26,13 +31,13 @@ const TasksPage: React.FC = () => {
     const doctorsApi = new DoctorsApi();
 
     const fetchTasks = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
             if (!patientId) {
                 message.error("Patient ID not found.");
                 return;
             }
-            const tasks = await tasksApi.getPatientTasks({patientId});
+            const tasks = await tasksApi.getPatientTasks({ patientId });
             setTasks(tasks);
         } catch (error) {
             console.error("Error fetching tasks:", error);
@@ -62,9 +67,22 @@ const TasksPage: React.FC = () => {
         }
     };
 
-    const handleCreateTask = async (values: { type: string; notes: string }) => {
+    const fetchTaskImages = async (taskId: string) => {
+        setDetailsLoading(true);
         try {
-            setLoading(true);
+            const images = await imagesApi.getTaskImages({ taskId });
+            setTaskImages(images);
+        } catch (error) {
+            console.error("Error fetching task images:", error);
+            message.error("Failed to fetch task images.");
+        } finally {
+            setDetailsLoading(false);
+        }
+    };
+
+    const handleCreateTask = async (values: { type: string; notes: string }) => {
+        setFormLoading(true);
+        try {
             if (!patientId || !selectedType || !selectedDoctor) {
                 message.error("Patient ID, Consultation Type, or Doctor not selected.");
                 return;
@@ -84,12 +102,11 @@ const TasksPage: React.FC = () => {
             if (fileList.length > 0) {
                 for (const file of fileList) {
                     const base64Data = await getBase64(file.originFileObj);
-                    console.log("Base64 data:", base64Data);
                     await imagesApi.postTaskImages({
                         taskId: newTask.id as string,
                         postImageRequest: {
                             ...base64Data,
-                            patientId
+                            patientId,
                         },
                     });
                 }
@@ -104,9 +121,16 @@ const TasksPage: React.FC = () => {
             console.error("Error creating task:", error);
             message.error("Failed to create task.");
         } finally {
-            setLoading(false);
+            setFormLoading(false);
         }
     };
+
+    const handleViewDetails = async (task: Task) => {
+        setCurrentTask(task);
+        setIsDetailsModalVisible(true);
+        await fetchTaskImages(task.id as string);
+    };
+
     const getBase64 = (file: File): Promise<{ type: string; base64Data: string }> => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -161,7 +185,7 @@ const TasksPage: React.FC = () => {
             dataIndex: "status",
             key: "status",
             render: (status: string) => (
-               <Tag color={status === "Open" ? "blue" : "green"}>{status}</Tag>
+                <Tag color={status === "Open" ? "blue" : "green"}>{status}</Tag>
             ),
         },
         {
@@ -170,11 +194,11 @@ const TasksPage: React.FC = () => {
             key: "price",
         },
         {
-            title: "Images",
+            title: "Details",
             key: "images",
             render: (_: any, record: Task) => (
-                <Button type="link">
-                    View Images {/* Replace with logic for viewing images */}
+                <Button type="link" onClick={() => handleViewDetails(record)}>
+                    View Details
                 </Button>
             ),
         },
@@ -268,6 +292,46 @@ const TasksPage: React.FC = () => {
                         </Form>
                     </>
                 )}
+            </Modal>
+            <Modal
+                title="Task Details"
+                visible={isDetailsModalVisible}
+                onCancel={() => setIsDetailsModalVisible(false)}
+                footer={null}
+            >
+                <Spin spinning={detailsLoading}>
+                    {currentTask && (
+                        <>
+                            <p>
+                                <strong>Type:</strong>{" "}
+                                {consultationTypes.find((t) => t.id === currentTask.type)?.type}
+                            </p>
+                            <p>
+                                <strong>Status:</strong>{" "}
+                                <Tag color={currentTask.status === "Open" ? "blue" : "green"}>
+                                    {currentTask.status}
+                                </Tag>
+                            </p>
+                            <p>
+                                <strong>Price:</strong> ${currentTask.price}
+                            </p>
+                            <p>
+                                <strong>Notes:</strong> {currentTask.notes}
+                            </p>
+                            <div>
+                                <strong>Images:</strong>
+                                {taskImages.map((image, index) => (
+                                    <img
+                                        key={index}
+                                        src={image.signedUrl}
+                                        alt={`Task Image ${index + 1}`}
+                                        style={{ width: "100%", marginBottom: 10 }}
+                                    />
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </Spin>
             </Modal>
         </div>
     );
