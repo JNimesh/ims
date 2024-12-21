@@ -26,6 +26,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ setIsAuthenticated }) => {
 
             // Store token and roles in localStorage
             localStorage.setItem("token", JSON.stringify(decodedToken));
+            localStorage.setItem("accessToken", token);
             localStorage.setItem("roles", roles.join(","));
             localStorage.setItem("email", email);
 
