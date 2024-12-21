@@ -1,10 +1,10 @@
-import React, {useState, useEffect} from "react";
-import {Table, Button, Modal, Form, Input, Upload, Select, message, Tag, Spin} from "antd";
-import {PlusOutlined, UploadOutlined} from "@ant-design/icons";
-import {TasksApi, ImagesApi, ConsultationTypesApi, DoctorsApi} from "../api-client";
-import type {Task, ConsultationType, Doctor, Image} from "../api-client/models";
+import React, { useState, useEffect } from "react";
+import { Table, Button, Modal, Form, Input, Upload, Select, message, Tag, Spin } from "antd";
+import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import { TasksApi, ImagesApi, ConsultationTypesApi, DoctorsApi } from "../api-client";
+import type { Task, ConsultationType, Doctor, Image } from "../api-client/models";
 
-const {Option} = Select;
+const { Option } = Select;
 
 const TasksPage: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -20,8 +20,10 @@ const TasksPage: React.FC = () => {
     const [detailsLoading, setDetailsLoading] = useState(false);
     const [formLoading, setFormLoading] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
+    const [detailsStep, setDetailsStep] = useState(1);
     const [fileList, setFileList] = useState<any[]>([]);
     const [form] = Form.useForm();
+    const [notesForm] = Form.useForm();
     const principal = JSON.parse(localStorage.getItem("token") || "{}");
     const isPatient = localStorage.getItem("roles")?.includes("PATIENT");
     const userId = principal?.sub;
@@ -38,7 +40,9 @@ const TasksPage: React.FC = () => {
                 message.error("User ID not found.");
                 return;
             }
-            const tasks = isPatient ? await tasksApi.getPatientTasks({patientId: userId}) : await tasksApi.getDoctorTasks({doctorId: userId});
+            const tasks = isPatient
+                ? await tasksApi.getPatientTasks({ patientId: userId })
+                : await tasksApi.getDoctorTasks({ doctorId: userId });
             tasks.sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
             setTasks(tasks);
         } catch (error) {
@@ -59,20 +63,10 @@ const TasksPage: React.FC = () => {
         }
     };
 
-    const fetchDoctors = async (consultationTypeId: string) => {
-        try {
-            const doctors = await doctorsApi.listDoctorsByConsultationType({consultationTypeId});
-            setDoctors(doctors);
-        } catch (error) {
-            console.error("Error fetching doctors:", error);
-            message.error("Failed to fetch doctors.");
-        }
-    };
-
     const fetchTaskImages = async (taskId: string) => {
         setDetailsLoading(true);
         try {
-            const images = await imagesApi.getTaskImages({taskId});
+            const images = await imagesApi.getTaskImages({ taskId });
             setTaskImages(images);
         } catch (error) {
             console.error("Error fetching task images:", error);
@@ -82,46 +76,20 @@ const TasksPage: React.FC = () => {
         }
     };
 
-    const handleCreateTask = async (values: { type: string; notes: string }) => {
+    const handleAddNotes = async (values: { notes: string }) => {
         setFormLoading(true);
         try {
-            if (!userId || !selectedType || !selectedDoctor) {
-                message.error("Patient ID, Consultation Type, or Doctor not selected.");
-                return;
-            }
-            const newTask = await tasksApi.postTasks({
-                createTaskRequest: {
-                    type: selectedType,
-                    notes: values.notes,
-                    patientId: userId,
-                    doctorId: selectedDoctor,
-                    status: "Open",
-                    price: consultationTypes?.find((type) => type.id === selectedType)?.price,
-                },
+            if (!currentTask) return;
+            await tasksApi.patchTaskById({
+                taskId: currentTask.id as string,
+                updateTaskRequest: { ...currentTask, notes: values.notes, status: "Closed" },
             });
-
-            // Upload images if any
-            if (fileList.length > 0) {
-                for (const file of fileList) {
-                    const base64Data = await getBase64(file.originFileObj);
-                    await imagesApi.postTaskImages({
-                        taskId: newTask.id as string,
-                        postImageRequest: {
-                            ...base64Data,
-                            patientId: userId,
-                        },
-                    });
-                }
-            }
-
-            message.success("Task created successfully.");
+            message.success("Notes added successfully.");
             fetchTasks();
-            setIsModalVisible(false);
-            form.resetFields();
-            setFileList([]);
+            setIsDetailsModalVisible(false);
         } catch (error) {
-            console.error("Error creating task:", error);
-            message.error("Failed to create task.");
+            console.error("Error adding notes:", error);
+            message.error("Failed to add notes.");
         } finally {
             setFormLoading(false);
         }
@@ -130,41 +98,9 @@ const TasksPage: React.FC = () => {
     const handleViewDetails = async (task: Task) => {
         setCurrentTask(task);
         setTaskImages([]);
+        setDetailsStep(1);
         setIsDetailsModalVisible(true);
         await fetchTaskImages(task.id as string);
-    };
-
-    const getBase64 = (file: File): Promise<{ type: string; base64Data: string }> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => {
-                const result = reader.result as string;
-                const base64Data = result.split(",")[1]; // Extract only the base64 part
-                resolve({
-                    type: file.type, // Get the MIME type of the file
-                    base64Data,
-                });
-            };
-            reader.onerror = (error) => reject(error);
-        });
-    };
-
-    const handleNextStep = async () => {
-        if (!selectedType) {
-            message.error("Please select a consultation type.");
-            return;
-        }
-        await fetchDoctors(selectedType);
-        setCurrentStep(2);
-    };
-
-    const handleBackStep = () => {
-        setCurrentStep(1);
-        form.resetFields();
-        setFileList([]);
-        setDoctors([]);
-        setSelectedDoctor(null);
     };
 
     useEffect(() => {
@@ -207,7 +143,7 @@ const TasksPage: React.FC = () => {
             key: "images",
             render: (_: any, record: Task) => (
                 <Button type="link" onClick={() => handleViewDetails(record)}>
-                    {isPatient || record.status === 'Closed' ? "View Details" : "Diagnose Report"}
+                    {isPatient || record.status === "Closed" ? "View Details" : "Diagnose Report"}
                 </Button>
             ),
         },
@@ -215,103 +151,25 @@ const TasksPage: React.FC = () => {
 
     return (
         <div>
-            {
-                isPatient && <Button
+            {isPatient && (
+                <Button
                     type="primary"
-                    icon={<PlusOutlined/>}
+                    icon={<PlusOutlined />}
                     onClick={() => setIsModalVisible(true)}
-                    style={{marginBottom: "16px"}}
+                    style={{ marginBottom: "16px" }}
                 >
                     Create Task
                 </Button>
-            }
-            <Table
-                columns={columns}
-                dataSource={tasks}
-                rowKey="id"
-                loading={loading}
-            />
+            )}
+            <Table columns={columns} dataSource={tasks} rowKey="id" loading={loading} />
             <Modal
-                title="Create Task"
-                visible={isModalVisible}
-                onCancel={() => {
-                    setIsModalVisible(false);
-                    setCurrentStep(1);
-                }}
-                footer={null}
-            >
-                {currentStep === 1 ? (
-                    <>
-                        <Form>
-                            <Form.Item label="Select Consultation Type">
-                                <Select
-                                    placeholder="Select a consultation type"
-                                    onChange={(value) => setSelectedType(value)}
-                                >
-                                    {consultationTypes.map((type) => (
-                                        <Option key={type.id} value={type.id}>
-                                            {type.type}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                            <Button type="primary" onClick={handleNextStep} block>
-                                Next
-                            </Button>
-                        </Form>
-                    </>
-                ) : (
-                    <>
-                        <Form form={form} layout="vertical" onFinish={handleCreateTask}>
-                            <div
-                                style={{marginBottom: '10px'}}>{`Consultation Charges for Selected Report Type: ${consultationTypes.find(t => t.id === selectedType)?.price}`}</div>
-                            <Form.Item
-                                label="Select Doctor"
-                                name="doctorId"
-                                rules={[{required: true, message: "Please select a doctor."}]}
-                            >
-                                <Select
-                                    placeholder="Select a doctor"
-                                    onChange={(value) => setSelectedDoctor(value)}
-                                >
-                                    {doctors.map((doctor) => (
-                                        <Option key={doctor.id} value={doctor.id}>
-                                            {doctor.name}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                            {/*<Form.Item label="Notes" name="notes">*/}
-                            {/*    <Input.TextArea placeholder="Enter task notes"/>*/}
-                            {/*</Form.Item>*/}
-                            <Form.Item label="Images">
-                                <Upload
-                                    beforeUpload={() => false}
-                                    fileList={fileList}
-                                    onChange={({fileList}) => setFileList(fileList.slice(0, 2))}
-                                    multiple
-                                >
-                                    <Button icon={<UploadOutlined/>}>Upload (Max: 2 Images)</Button>
-                                </Upload>
-                            </Form.Item>
-                            <Button type="default" onClick={handleBackStep} style={{marginRight: "8px"}}>
-                                Back
-                            </Button>
-                            <Button type="primary" htmlType="submit" loading={loading}>
-                                Submit
-                            </Button>
-                        </Form>
-                    </>
-                )}
-            </Modal>
-            <Modal
-                title="Task Details"
+                title={detailsStep === 1 ? "Task Details" : "Add Notes"}
                 visible={isDetailsModalVisible}
                 onCancel={() => setIsDetailsModalVisible(false)}
                 footer={null}
             >
-                <Spin spinning={detailsLoading}>
-                    {currentTask && (
+                <Spin spinning={detailsLoading || formLoading}>
+                    {detailsStep === 1 && currentTask && (
                         <>
                             <p>
                                 <strong>Type:</strong>{" "}
@@ -327,9 +185,11 @@ const TasksPage: React.FC = () => {
                                 <strong>Price:</strong> ${currentTask.price}
                             </p>
                             {
-                                currentTask.status === "Closed" && <p>
-                                    <strong>Notes:</strong> {currentTask.notes}
-                                </p>
+                                currentTask.notes && (
+                                    <p>
+                                        <strong>Notes:</strong> {currentTask.notes}
+                                    </p>
+                                )
                             }
                             <div>
                                 <strong>Images:</strong>
@@ -342,7 +202,34 @@ const TasksPage: React.FC = () => {
                                     />
                                 ))}
                             </div>
+                            {!isPatient && currentTask.status === "Open" && (
+                                <Button
+                                    type="primary"
+                                    onClick={() => setDetailsStep(2)}
+                                    block
+                                    style={{marginTop: "16px"}}
+                                >
+                                    Add Notes
+                                </Button>
+                            )}
                         </>
+                    )}
+                    {detailsStep === 2 && (
+                        <Form form={notesForm} layout="vertical" onFinish={handleAddNotes}>
+                            <Form.Item
+                                label="Notes"
+                                name="notes"
+                                rules={[{ required: true, message: "Please add your notes." }]}
+                            >
+                                <Input.TextArea placeholder="Enter your notes here" />
+                            </Form.Item>
+                            <Button type="default" onClick={() => setDetailsStep(1)} style={{ marginRight: "8px" }}>
+                                Back
+                            </Button>
+                            <Button type="primary" htmlType="submit" loading={formLoading}>
+                                Submit
+                            </Button>
+                        </Form>
                     )}
                 </Spin>
             </Modal>
