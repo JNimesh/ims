@@ -1,20 +1,36 @@
-import { Context } from "openapi-backend";
+import {Context} from "openapi-backend";
 import {createTask, getTasksByDoctorId, getTasksByPatientId, updateTask} from "../services/taskService";
 import {getImagesByTask, saveImageRecord, uploadImageToS3} from "../services/imageService";
 import {AWSError} from "aws-sdk";
+import {Lambda} from 'aws-sdk'; // Import AWS SDK for Lambda
+
+const lambda = new Lambda();
 
 export const createTaskHandler = async (context: Context): Promise<Record<string, any>> => {
     try {
-        const { type, status, patientId, doctorId, price, notes } = context.request.body;
+        const {type, status, patientId, doctorId, price, notes} = context.request.body;
 
         if (!type || !status || !patientId) {
             return {
                 statusCode: 400,
-                body: { message: "Type, status, and patientId are required" },
+                body: {message: "Type, status, and patientId are required"},
             };
         }
 
         const task = await createTask(type, status, patientId, doctorId, price, notes);
+
+        const financePayload = {
+            consultationType: type,
+            patientId,
+            price,
+            timestamp: new Date().toISOString(),
+        };
+        // Invoke the finance lambda function asynchronously
+        await lambda.invoke({
+            FunctionName: process.env.FINANCE_LAMBDA_ARN as string, // Replace with your finance Lambda function name
+            InvocationType: 'Event', // Asynchronous invocation
+            Payload: JSON.stringify(financePayload),
+        }).promise();
 
         return {
             statusCode: 201,
@@ -24,7 +40,7 @@ export const createTaskHandler = async (context: Context): Promise<Record<string
         console.error("Error creating task:", error);
         return {
             statusCode: 500,
-            body: { message: "Internal server error", error: (error as AWSError).message },
+            body: {message: "Internal server error", error: (error as AWSError).message},
         };
     }
 };
@@ -36,7 +52,7 @@ export const getImagesByTaskHandler = async (context: Context): Promise<Record<s
         if (!taskId) {
             return {
                 statusCode: 400,
-                body: { message: "Task ID is required" },
+                body: {message: "Task ID is required"},
             };
         }
 
@@ -50,19 +66,19 @@ export const getImagesByTaskHandler = async (context: Context): Promise<Record<s
         console.error("Error fetching images:", error);
         return {
             statusCode: 500,
-            body: { message: "Internal server error", error: (error as AWSError).message },
+            body: {message: "Internal server error", error: (error as AWSError).message},
         };
     }
 };
 
 export const postImageHandler = async (context: Context): Promise<Record<string, any>> => {
     try {
-        const { base64Data, type, patientId } = context.request.body;
+        const {base64Data, type, patientId} = context.request.body;
         const taskId = context.request.params?.taskId;
         if (!base64Data || !type || !patientId || !taskId) {
             return {
                 statusCode: 400,
-                body: { message: "Base64 data, type, task id and patientId are required" },
+                body: {message: "Base64 data, type, task id and patientId are required"},
             };
         }
         const s3Url = await uploadImageToS3(base64Data, type);
@@ -75,7 +91,7 @@ export const postImageHandler = async (context: Context): Promise<Record<string,
         console.error("Error uploading image:", error);
         return {
             statusCode: 500,
-            body: { message: "Internal server error", error: (error as AWSError).message },
+            body: {message: "Internal server error", error: (error as AWSError).message},
         };
     }
 };
@@ -89,7 +105,7 @@ export const updateTaskHandler = async (context: Context): Promise<Record<string
         if (!taskId) {
             return {
                 statusCode: 400,
-                body: { message: "Task ID is required" },
+                body: {message: "Task ID is required"},
             };
         }
         const task = await updateTask(taskId, updates);
@@ -101,7 +117,7 @@ export const updateTaskHandler = async (context: Context): Promise<Record<string
         console.error("Error updating task:", error);
         return {
             statusCode: 500,
-            body: { message: "Internal server error", error: (error as AWSError).message },
+            body: {message: "Internal server error", error: (error as AWSError).message},
         };
     }
 };
@@ -114,7 +130,7 @@ export const getDoctorTasks = async (context: Context): Promise<Record<string, a
         if (!doctorId) {
             return {
                 statusCode: 400,
-                body: { message: "Doctor ID is required" },
+                body: {message: "Doctor ID is required"},
             };
         }
 
@@ -128,7 +144,7 @@ export const getDoctorTasks = async (context: Context): Promise<Record<string, a
         console.error("Error fetching tasks for doctor:", error);
         return {
             statusCode: 500,
-            body: { message: "Internal server error", error: (error as AWSError).message },
+            body: {message: "Internal server error", error: (error as AWSError).message},
         };
     }
 };
@@ -141,7 +157,7 @@ export const getPatientTasks = async (context: Context): Promise<Record<string, 
         if (!patientId) {
             return {
                 statusCode: 400,
-                body: { message: "Patient ID is required" },
+                body: {message: "Patient ID is required"},
             };
         }
 
@@ -155,7 +171,7 @@ export const getPatientTasks = async (context: Context): Promise<Record<string, 
         console.error("Error fetching tasks for patient:", error);
         return {
             statusCode: 500,
-            body: { message: "Internal server error", error: (error as AWSError).message },
+            body: {message: "Internal server error", error: (error as AWSError).message},
         };
     }
 };

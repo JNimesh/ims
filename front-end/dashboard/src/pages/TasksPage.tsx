@@ -33,6 +33,61 @@ const TasksPage: React.FC = () => {
     const consultationTypesApi = new ConsultationTypesApi();
     const doctorsApi = new DoctorsApi();
 
+    const handleCreateTask = async (values: { type: string; notes: string }) => {
+        setFormLoading(true);
+        try {
+            if (!userId || !selectedType || !selectedDoctor) {
+                message.error("Patient ID, Consultation Type, or Doctor not selected.");
+                return;
+            }
+            const newTask = await tasksApi.postTasks({
+                createTaskRequest: {
+                    type: selectedType,
+                    notes: values.notes,
+                    patientId: userId,
+                    doctorId: selectedDoctor,
+                    status: "Open",
+                    price: consultationTypes?.find((type) => type.id === selectedType)?.price,
+                },
+            });
+
+            // Upload images if any
+            if (fileList.length > 0) {
+                for (const file of fileList) {
+                    const base64Data = await getBase64(file.originFileObj);
+                    await imagesApi.postTaskImages({
+                        taskId: newTask.id as string,
+                        postImageRequest: {
+                            ...base64Data,
+                            patientId: userId,
+                        },
+                    });
+                }
+            }
+
+            message.success("Task created successfully.");
+            fetchTasks();
+            setIsModalVisible(false);
+            form.resetFields();
+            setFileList([]);
+        } catch (error) {
+            console.error("Error creating task:", error);
+            message.error("Failed to create task.");
+        } finally {
+            setFormLoading(false);
+        }
+    };
+
+    const fetchDoctors = async (consultationTypeId: string) => {
+        try {
+            const doctors = await doctorsApi.listDoctorsByConsultationType({consultationTypeId});
+            setDoctors(doctors);
+        } catch (error) {
+            console.error("Error fetching doctors:", error);
+            message.error("Failed to fetch doctors.");
+        }
+    };
+
     const fetchTasks = async () => {
         setLoading(true);
         try {
@@ -103,6 +158,39 @@ const TasksPage: React.FC = () => {
         await fetchTaskImages(task.id as string);
     };
 
+    const getBase64 = (file: File): Promise<{ type: string; base64Data: string }> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                const result = reader.result as string;
+                const base64Data = result.split(",")[1]; // Extract only the base64 part
+                resolve({
+                    type: file.type, // Get the MIME type of the file
+                    base64Data,
+                });
+            };
+            reader.onerror = (error) => reject(error);
+        });
+    };
+
+    const handleNextStep = async () => {
+        if (!selectedType) {
+            message.error("Please select a consultation type.");
+            return;
+        }
+        await fetchDoctors(selectedType);
+        setCurrentStep(2);
+    };
+
+    const handleBackStep = () => {
+        setCurrentStep(1);
+        form.resetFields();
+        setFileList([]);
+        setDoctors([]);
+        setSelectedDoctor(null);
+    };
+
     useEffect(() => {
         fetchTasks();
         fetchConsultationTypes();
@@ -162,6 +250,79 @@ const TasksPage: React.FC = () => {
                 </Button>
             )}
             <Table columns={columns} dataSource={tasks} rowKey="id" loading={loading} />
+            <Modal
+                title="Create Task"
+                visible={isModalVisible}
+                onCancel={() => {
+                    setIsModalVisible(false);
+                    setCurrentStep(1);
+                }}
+                footer={null}
+            >
+                {currentStep === 1 ? (
+                    <>
+                        <Form>
+                            <Form.Item label="Select Consultation Type">
+                                <Select
+                                    placeholder="Select a consultation type"
+                                    onChange={(value) => setSelectedType(value)}
+                                >
+                                    {consultationTypes.map((type) => (
+                                        <Option key={type.id} value={type.id}>
+                                            {type.type}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                            <Button type="primary" onClick={handleNextStep} block>
+                                Next
+                            </Button>
+                        </Form>
+                    </>
+                ) : (
+                    <>
+                        <Form form={form} layout="vertical" onFinish={handleCreateTask}>
+                            <div
+                                style={{marginBottom: '10px'}}>{`Consultation Charges for Selected Report Type: ${consultationTypes.find(t => t.id === selectedType)?.price}`}</div>
+                            <Form.Item
+                                label="Select Doctor"
+                                name="doctorId"
+                                rules={[{required: true, message: "Please select a doctor."}]}
+                            >
+                                <Select
+                                    placeholder="Select a doctor"
+                                    onChange={(value) => setSelectedDoctor(value)}
+                                >
+                                    {doctors.map((doctor) => (
+                                        <Option key={doctor.id} value={doctor.id}>
+                                            {doctor.name}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                            {/*<Form.Item label="Notes" name="notes">*/}
+                            {/*    <Input.TextArea placeholder="Enter task notes"/>*/}
+                            {/*</Form.Item>*/}
+                            <Form.Item label="Images">
+                                <Upload
+                                    beforeUpload={() => false}
+                                    fileList={fileList}
+                                    onChange={({fileList}) => setFileList(fileList.slice(0, 2))}
+                                    multiple
+                                >
+                                    <Button icon={<UploadOutlined/>}>Upload (Max: 2 Images)</Button>
+                                </Upload>
+                            </Form.Item>
+                            <Button type="default" onClick={handleBackStep} style={{marginRight: "8px"}}>
+                                Back
+                            </Button>
+                            <Button type="primary" htmlType="submit" loading={loading}>
+                                Submit
+                            </Button>
+                        </Form>
+                    </>
+                )}
+            </Modal>
             <Modal
                 title={detailsStep === 1 ? "Task Details" : "Add Notes"}
                 visible={isDetailsModalVisible}

@@ -8,8 +8,22 @@ export class BackendStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
+        const financeLambda = new lambda.Function(this, 'finance-lambda', {
+            runtime: lambda.Runtime.NODEJS_20_X,
+            memorySize: 1024,
+            timeout: Duration.seconds(30),
+            handler: 'dist/index.financeHandler',
+            code: lambda.Code.fromAsset('lambdas/finance-data-aggregator/build.zip'),
+            environment: {
+                DB_HOST: "task-management-db.c3omky0co1uh.ap-south-1.rds.amazonaws.com",
+                DB_PORT: "3306",
+                DB_NAME: "task_management",
+                DB_USER: "admin",
+                DB_PASSWORD: "42fAanya!",
+            },
+        });
+
         const services = ['task-management-service'];
-        // const services = ['task-management-service', 'image-service', 'notification-service', 'task-service'];
 
         services.forEach((service) => {
             const lambdaFunction = new lambda.Function(this, `${service}-lambda`, {
@@ -28,6 +42,7 @@ export class BackendStack extends Stack {
                     DB_USER: "admin",
                     DB_PASSWORD: "42fAanya!",
                     S3_BUCKET_NAME: "ims-data-bucket",
+                    FINANCE_LAMBDA_ARN: financeLambda.functionArn,
                 }
             });
 
@@ -56,6 +71,15 @@ export class BackendStack extends Stack {
                     resources: [`arn:aws:s3:::ims-data-bucket/*`],
                 })
             );
+
+            lambdaFunction.addToRolePolicy(
+                new iam.PolicyStatement({
+                    actions: [
+                        "lambda:InvokeFunction",
+                    ],
+                    resources: [financeLambda.functionArn],
+                })
+            )
 
             new apigateway.LambdaRestApi(this, `${service}-api`, {
                 handler: lambdaFunction,
